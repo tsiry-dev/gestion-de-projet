@@ -1,0 +1,150 @@
+{
+  "compilerOptions": {
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+
+
+    /* =========================
+     📁 STRUCTURE DU PROJET
+     ========================= */
+
+    "rootDir": "./src",
+    // 👉 Dossier source TypeScript (tout ton code TS)
+
+    "outDir": "./dist",
+    // 👉 Dossier de sortie compilé en JavaScript
+
+    "ignoreDeprecations": "6.0",
+    // 👉 Ignore certains warnings TS anciens (compatibilité)
+
+    // "typeRoots": [
+    //   "./node_modules/@types",
+    //   "./src/shared/types"
+    // ],
+    // 👉 Dossiers où TypeScript cherche les types :
+    // - node_modules/@types → types externes (express, node...)
+    // - src/shared/types → tes types personnalisés
+
+
+    /* =========================
+     ⚙️ NODE MODERNE (ESM)
+     ========================= */
+
+    "target": "ES2022",
+    // 👉 Version JavaScript générée (Node moderne)
+
+    "module": "NodeNext",
+    // 👉 Utilise modules ESM modernes Node.js
+
+    "moduleResolution": "NodeNext",
+    // 👉 Résolution imports compatible ESM Node
+
+    "moduleDetection": "force",
+    // 👉 Force TypeScript à traiter tous les fichiers comme modules
+
+
+    /* =========================
+     🔐 TYPE SAFETY (niveau senior)
+     ========================= */
+
+    "strict": true,
+    // 👉 Active toutes les règles strictes TypeScript (recommandé)
+
+    "noUncheckedIndexedAccess": true,
+    // 👉 Empêche accès dangereux aux arrays/objets sans check
+
+    "exactOptionalPropertyTypes": true,
+    // 👉 Différencie undefined vs propriété absente (très strict)
+
+
+    /* =========================
+     📦 TYPES NODE
+     ========================= */
+
+    "types": ["node"],
+    // 👉 Charge les types Node.js (fs, path, process, etc)
+
+
+    /* =========================
+     🔄 MODULE INTEROP
+     ========================= */
+
+    "esModuleInterop": true,
+    // 👉 Permet :
+    // import express from "express"
+
+    "allowSyntheticDefaultImports": true,
+    // 👉 Autorise imports par défaut même si module CommonJS
+
+
+    /* =========================
+     🧠 COMPILATION & PERF
+     ========================= */
+
+    "skipLibCheck": true,
+    // 👉 Ignore vérification des types des librairies (plus rapide build)
+
+    "isolatedModules": true,
+    // 👉 Chaque fichier doit être compilable indépendamment (important TS/ESM)
+
+
+    /* =========================
+     🧾 DEBUG / BUILD OUTPUT
+     ========================= */
+
+    "sourceMap": true,
+    // 👉 Permet debug TS dans VS Code (trace ligne originale)
+
+    "declaration": true,
+    // 👉 Génère fichiers .d.ts (types publics)
+
+    "declarationMap": true,
+    // 👉 Permet de naviguer entre .d.ts et TS original
+
+
+    /* =========================
+     🚫 CLEAN CODE RULES
+     ========================= */
+
+    "noImplicitReturns": true,
+    // 👉 Oblige à retourner une valeur dans toutes les branches
+
+    "noFallthroughCasesInSwitch": true,
+    // 👉 Empêche erreurs switch sans break
+
+    "noUnusedLocals": true,
+    // 👉 Empêche variables inutilisées
+
+    "noUnusedParameters": true,
+    // 👉 Empêche paramètres inutilisés
+
+
+    /* =========================
+     📦 PATH ALIAS (IMPORTS PROPRE)
+     ========================= */
+
+    "baseUrl": "./src",
+    // 👉 Base pour les imports absolus
+
+    "paths": {
+      "@/*": ["*"]
+    }
+    // 👉 Permet :
+    // import User from "@/modules/user/User"
+
+  },
+
+
+  /* =========================
+   📂 INCLUDE / EXCLUDE
+  ========================= */
+
+  "include": ["src"],
+  // 👉 Dossier compilé
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test"
+  ]
+  // 👉 Dossiers ignorés par TypeScript
+}

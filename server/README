@@ -1,0 +1,26 @@
+npm init -y 
+npx tsc --init
+npm install -D tsconfig-paths
+npm install -D tsx
+
+npm install \
+express \
+mongoose \
+jsonwebtoken \
+bcrypt \
+cors \
+dotenv \
+cookie-parser \
+zod \
+uuid \
+helmet \
+morgan \
+express-rate-limit
+
+npm install -D \
+typescript \
+@types/express \
+@types/cors \
+@types/bcrypt \
+@types/jsonwebtoken \
+@types/cookie-parser \
