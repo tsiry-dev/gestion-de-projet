@@ -15,8 +15,6 @@ export interface Task {
     projectId: Types.ObjectId,
     title: string,
     status: TaskStatusType,
-    startDate?: Date,
-    endDate?: Date
 }
 
 export type TaskDocument = HydratedDocument<Task>;
@@ -37,14 +35,6 @@ const taskSchema = new Schema<Task>({
         type: String,
         enum: Object.values(TaskStatus),
         default: TaskStatus.TODO
-    },
-    startDate: {
-        type: Date,
-        default: null
-    },
-    endDate: {
-        type: Date,
-        default: null
     }
 }, { 
     timestamps: true

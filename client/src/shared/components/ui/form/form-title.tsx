@@ -5,7 +5,7 @@ type Props = {
 
 export default function FormTitle({ title, description }: Props) {
   return (
-    <div className="mb-6">
+    <div className="">
       <h2 className="text-xl font-semibold text-gray-900 font-mono">
         {title}
       </h2>

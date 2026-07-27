@@ -1,10 +1,9 @@
 export const ProjectStatus = {
-  TODO: "TODO",
+  NOT_STARTED: "NOT_STARTED",
   IN_PROGRESS: "IN_PROGRESS",
-  IN_REVIEW: "IN_REVIEW",
-  DONE: "DONE",
-  CANCELLED: "CANCELLED",
+  COMPLETED: "COMPLETED",
 } as const;
+
 
 export type StatusType =
   typeof ProjectStatus[keyof typeof ProjectStatus];

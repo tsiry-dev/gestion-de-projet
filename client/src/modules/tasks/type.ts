@@ -10,15 +10,19 @@ export type TaskStatusType = typeof TaskStatus[keyof typeof TaskStatus];
 
 
 export type TaskType = {
+    _id: string;
     projectId: string;
     title: string,
     status: TaskStatusType,
-    startDate?: Date,
-    endDate?: Date
 }
 
 
 export type UpdateTaskStatusDTO = {
   taskId: string;
   status: TaskStatusType
+}
+
+export type UpdateTaskDTO = {
+   id: string;
+   title: string;
 }

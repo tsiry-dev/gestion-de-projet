@@ -34,7 +34,8 @@ export const ENDPOINTS = {
     CREATE: "/tasks/create",
     DELETE: (id: string) => `/tasks/remove/${id}`,
     DELETEALL: "/tasks/remove/all",
-    UPDATESTATUS: "/tasks/update/status"
+    UPDATESTATUS: "/tasks/update/status",
+    UPDATE : "/tasks/update"
   }
 
 } as const;

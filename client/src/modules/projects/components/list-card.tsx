@@ -5,7 +5,7 @@ import type { StatusType } from "../type";
 import CardTitle from "@/shared/components/ui/card-title";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/app/store/store";
-import { remove } from "@/app/store/features/projectSlice";
+import { onOpenProjectDetail, remove } from "@/app/store/features/projectSlice";
 
 
 type Props = {
@@ -66,6 +66,10 @@ export default function ListCard({
           <div className="flex items-center gap-2">
 
             <button
+              onClick={(e: any) => {
+                e.stopPropagation();
+                dispatch(onOpenProjectDetail(project._id))
+              }}
               className="p-2 rounded-lg text-blue-600 hover:bg-blue-50 transition"
               title="Voir"
             >

@@ -46,6 +46,6 @@ export const bgStatus = (status: string) => {
         case "CANCELLED":
            return "bg-red-300 rounded-md";
         default: 
-            "bg-white"
+            return "bg-white"
     }
 }

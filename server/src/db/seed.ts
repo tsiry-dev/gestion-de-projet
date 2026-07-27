@@ -224,11 +224,11 @@ async function seed() {
        const numberOfTasks = random(50, 80);
 
       for (let i = 0; i < numberOfTasks; i++) {
-        const start = new Date();
-        start.setDate(start.getDate() + random(-10, 20));
+        // const start = new Date();
+        // start.setDate(start.getDate() + random(-10, 20));
 
-        const end = new Date(start);
-        end.setDate(end.getDate() + random(1, 10));
+        // const end = new Date(start);
+        // end.setDate(end.getDate() + random(1, 10));
 
         tasks.push({
           projectId: project._id,
@@ -239,9 +239,9 @@ async function seed() {
 
           status: randomStatus(),
 
-          startDate: start,
+          // startDate: start,
 
-          endDate: end,
+          // endDate: end,
         });
       }
     }

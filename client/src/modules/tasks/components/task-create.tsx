@@ -7,12 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { taskCreateSchema, type TaskCreateDTO } from "../schema/task-create.schema";
 import useCreateTask from "../hooks/useTaskCreate";
-// import { notify } from "@/core/feedback/notify";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/app/store/store";
-import { useEffect } from "react";
 import { notify } from "@/core/feedback/notify";
-import LoaderDelete from "@/shared/components/loader-delete";
+import LoaderButton from "@/shared/components/ui/loader-button";
 
 export default function TaskCreate()  {
 
@@ -28,14 +26,12 @@ export default function TaskCreate()  {
     } = useForm<TaskCreateDTO>({
         resolver: zodResolver(taskCreateSchema),
         defaultValues: {
-          title: "",
-          startDate: undefined,
-          endDate: undefined,
+          title: ""
         }
     });
 
 
-    const { mutate: createTask, isPending, error } = useCreateTask();
+    const { mutate: createTask, isPending, error } = useCreateTask(projectDetailId);
 
   const onSubmit = (data: Omit<TaskCreateDTO, "projectId">) => {
      const payload = {
@@ -45,7 +41,8 @@ export default function TaskCreate()  {
 
      createTask(payload, {
         onSuccess: () => {
-          notify.success("Tacjhe créer avex success!!")
+          notify.success("Tacjhe créer avex success!!");
+          reset();
         }
      });
      console.log(payload);
@@ -71,43 +68,10 @@ export default function TaskCreate()  {
         </FormItem>
 
 
-        <div className="flex gap-2">
-
-          <div className="flex-1">
-            <FormItem
-              label="Date de début"
-              error={errors.startDate?.message}
-            >
-              <Input
-                type="date"
-                {...register("startDate", {
-                  valueAsDate: true,
-                })}
-              />
-            </FormItem>
-          </div>
-
-
-          <div className="flex-1">
-            <FormItem
-              label="Date de fin"
-              error={errors.endDate?.message}
-            >
-              <Input
-                type="date"
-                {...register("endDate", {
-                  valueAsDate: true,
-                })}
-              />
-            </FormItem>
-          </div>
-
-        </div>
-
 
             <Button disabled={isPending}>
               {isPending ?
-                <LoaderDelete />
+                <LoaderButton title="Création..."/>
                :
                  "Ajouté"
                }

@@ -10,7 +10,7 @@ taskRoutes.get("/:id", taskController.findById);
 
 taskRoutes.post("/create", taskController.create);
 
-taskRoutes.patch("/update/:id", taskController.update);
+taskRoutes.patch("/update", taskController.update);
 taskRoutes.put("/update/status", taskController.updateStatus);
 
 taskRoutes.delete("/remove/all", taskController.removeAll);

@@ -58,8 +58,8 @@ export class TaskController {
 
     public update = asyncHandler(
         async(req: Request, res: Response) => {
-           const { id } = req.params;
-           const data = updateTaskSchema.parse({id, ...req.body});
+            console.log(req.body);
+           const data = updateTaskSchema.parse(req.body);
            const task = await this.taskService.update(data);
 
            return res.status(HTTPSTATUS.OK).json({

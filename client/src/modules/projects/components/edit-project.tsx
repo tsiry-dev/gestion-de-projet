@@ -13,7 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/app/store/store";
 import { updateProjectSchema, type UpdateProjectDTO } from "../schema/update-project.schema";
 import useUpdateProject from "../hooks/useUpdateProject";
-import { edit, onCloseUpdateProject, resetEdit } from "@/app/store/features/projectSlice";
+import { onCloseUpdateProject, resetEdit } from "@/app/store/features/projectSlice";
 import { useState } from "react";
 import { handleApiError } from "@/core/errors/handleApiError";
 
@@ -117,13 +117,15 @@ export default function EditProject() {
                         {status.value}
                         </option>
                     ))}
-
                 </Select>
             </FormItem>
 
-            <Button type="submit" disabled={isPending} className="relative z-50 mt-50">
-              {isPending ?
-                <LoaderDelete />
+            <Button type="submit" disabled={isPending} className="mt-2">
+              {isPending ? (
+                <div className="flex items-center gap-2">
+                    <LoaderDelete /> Modification...
+                </div>
+              )
                :
                  "Modifier"
                }

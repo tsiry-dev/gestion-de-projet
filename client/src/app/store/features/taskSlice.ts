@@ -7,13 +7,15 @@ type InitialStateType = {
    isCreateTask: boolean;
    deleteTaskIds: string[];
    isMoveTask: any | null;
+   taskEdit: TaskType | null
 }
 
 const initialState: InitialStateType = {
    taskDetail: null,
    isCreateTask: false,
    deleteTaskIds: [],
-   isMoveTask: null
+   isMoveTask: null,
+   taskEdit: null,
 }
 
 export const taskSlice = createSlice({
@@ -43,6 +45,10 @@ export const taskSlice = createSlice({
     handleResetMoveTask: (state) => {
       state.isMoveTask = null;
     },
+    handleEditTaskTitle:  (state, action) => {
+       state.taskEdit = action.payload;
+    },
+    handleResetEditTask: (state) => {state.taskEdit = null} 
   },
 })
 
@@ -56,7 +62,9 @@ export const {
    handleResetDeleteTaskIds,
    handleDeleteTaskInStore,
    handleCreateMoveTask,
-   handleResetMoveTask
+   handleResetMoveTask,
+   handleEditTaskTitle,
+   handleResetEditTask
 } = taskSlice.actions
 
 // Exporter le reducer par défaut

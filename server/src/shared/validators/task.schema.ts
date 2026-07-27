@@ -26,22 +26,8 @@ export const updateTaskSchema = z.object({
   
      title: z.string()
               .nonempty("Le titre est requis"),
-    startDate: z.coerce.date({
-      message: "La date début est obligatoire",
-    }),
 
-    endDate: z.coerce.date({
-      message: "La date fin est obligatoire",
-    }),
-  
-     status: z.enum(TaskStatus)
-}).refine(
-  (date) => date.startDate < date.endDate,
-  {
-    message: "La date de fin doit etre superieur a celle de la date su début",
-    path: ["startDate"]
-  }
-);
+});
 
 
 export type UpdateTaskDTO = z.infer<typeof updateTaskSchema>

@@ -9,7 +9,7 @@ type Variant =
 
 
 type Props = {
-  variant?: Variant;
+  $variant?: Variant;
 };
 
 
@@ -21,9 +21,9 @@ const Badge = styled.span<Props>`
   font-size: 8px;
   font-weight: 500;
 
-  ${({ variant = "gray" }) => {
+  ${({ $variant = "gray" }) => {
 
-    switch (variant) {
+    switch ($variant) {
 
       case "primary":
         return `

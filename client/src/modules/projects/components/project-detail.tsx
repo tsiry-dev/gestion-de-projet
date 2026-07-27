@@ -9,7 +9,7 @@ import { HiMiniPlus } from "react-icons/hi2";
 import ProjectDetailSkeleton from "./project-detail-skeleton";
 import ServerError from "@/shared/components/server-error";
 import TaskCreate from "@/modules/tasks/components/task-create";
-import { handleResetDeleteTaskIds, handleToggleCreateTask } from "@/app/store/features/taskSlice";
+import { handleCreateMoveTask, handleResetDeleteTaskIds, handleResetMoveTask, handleToggleCreateTask } from "@/app/store/features/taskSlice";
 import { MdClose } from "react-icons/md";
 import { VscEditCompact } from "react-icons/vsc";
 import { edit, resetEdit } from "@/app/store/features/projectSlice";
@@ -27,12 +27,50 @@ import TaskContent from "@/modules/tasks/components/task-content";
 import { useDeleteAllTask } from '../../tasks/hooks/useDeleteAllTask';
 import { notify } from "@/core/feedback/notify";
 import { useConfirmAction } from "@/shared/hooks/useConfirmAction";
-import LoaderDelete from "@/shared/components/loader-delete";
-import CardMini from "@/shared/components/ui/card-mini";
 import TaskItemSkeleton from "@/modules/tasks/components/task-item-skeleton";
+import LoaderButton from "@/shared/components/ui/loader-button";
+import { type TaskStatusType } from "@/modules/tasks/type";
+import { DndContext, useDndContext, type DragEndEvent } from "@dnd-kit/core";
+import TaskDropColumn from "@/modules/tasks/components/task-drop-column";
+import { useUpdateTaskStatus } from "@/modules/tasks/hooks/useUpdateTaskStatus";
+import TaskContentWrapper from "@/modules/tasks/components/task-content-wrapper";
+import { bgStatus } from "../utils";
+import { truncate } from "@/shared/utils/string.utils";
 
 
+type ColumType = {
+   id: number;
+   title: string;
+   status: TaskStatusType
+ }
 
+const COLUMNS: ColumType[] = [
+  {
+    id: 1,
+    title: "A faire",
+    status: "TODO"
+  },
+  {
+    id: 2,
+    title: "En cours",
+    status: "IN_PROGRESS"
+  },
+  {
+    id: 3,
+    title: "Terminer",
+    status: "DONE"
+  },
+  {
+    id: 4,
+    title: "A revoir",
+    status: "IN_REVIEW"
+  },
+  {
+    id: 5,
+    title: "Annuler",
+    status: "CANCELLED"
+  },
+];
 
 
 export default function ProjectDetail() {
@@ -49,6 +87,8 @@ export default function ProjectDetail() {
   } = useSelector((state: RootState) => state.tasks);
    const { mutate: deleteAllTask , isPending: loadRemoveTasks} = useDeleteAllTask(ids, projectId);
    const {confirm} = useConfirmAction();
+   const { mutate: updateTaskStatusQuery } = useUpdateTaskStatus(projectId);
+   const { active } = useDndContext();
 
    useEffect(() => {
      dispatch(handleResetDeleteTaskIds())
@@ -81,6 +121,48 @@ export default function ProjectDetail() {
     new Date(b.updatedAt).getTime() -
     new Date(a.updatedAt).getTime()
   );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+          const { active, over } = event;
+
+      if (!over) return;
+
+      const taskId = String(active.id);
+      const newStatus = over.id as TaskStatusType;
+
+      // retrouver la tâche déplacée
+      const currentTask = tasks?.find((t: any) => t._id === taskId);
+
+      if (!currentTask) return;
+
+      // ne rien faire si même colonne
+      if (currentTask.status === newStatus) return;
+
+      dispatch(
+        handleCreateMoveTask({
+          load: true,
+          status: newStatus,
+          taskId
+        })
+      );
+
+      updateTaskStatusQuery(
+        {
+          taskId,
+          status: newStatus,
+        },
+        {
+          onSuccess: () => {
+            notify.success(`Le tache "${truncate(currentTask.title, 25)}" à éte déplacé`);
+            dispatch(handleResetMoveTask());
+          },
+          onError: (error) => {
+            notify.error(error.message);
+            dispatch(handleResetMoveTask());
+          },
+        }
+      );
+  }
 
 
     return <div className="h-[85vh] overflow-hidden">
@@ -162,7 +244,7 @@ export default function ProjectDetail() {
                         >
                           {loadRemoveTasks ?
                            <span className="text-white flex items-center gap-2">
-                             <LoaderDelete /> <span>Suppression...</span>
+                             <LoaderButton title="Suppression en cours..."/>
                            </span>
                           :
                             <span className="flex items-center">
@@ -218,93 +300,38 @@ export default function ProjectDetail() {
                   <TaskCreate />
                ) : (
                 <>
-                  <ProjectTaskContainer>
-                      <TaskItemContainer status="TODO">
-                        <TaskSubtitle className="sticky top-0 z-10 bg-inherit py-2">
-                             A faire ({taskCount(tasks, "TODO")})
-                        </TaskSubtitle>
-                        <TaskContent>
-                          {isMoveTask?.load && isMoveTask?.status === "TODO" && (
-                             <TaskItemSkeleton />
-                          )}
-                          {tasks?.filter((t: any )=> t.status == "TODO").map((task: any) => (
-                             <TaskItem
-                                 isLoad={loadRemoveTasks} 
-                                 key={task._id} 
-                                 task={task}
-                              />
-                          ))}
-                        </TaskContent>
-                      </TaskItemContainer>
-
-                      {/* tache en progression */}
-                      <TaskItemContainer status="IN_PROGRESS">
-                        <TaskSubtitle>En cours ({taskCount(tasks, "IN_PROGRESS")})</TaskSubtitle>
-                        <TaskContent>
-                        {isMoveTask?.load && isMoveTask?.status === "IN_PROGRESS" && (
-                           <TaskItemSkeleton />
-                        )}
-                          {sortedTasks?.filter((t: any )=> t.status == "IN_PROGRESS").map((task: any) => (
-                             <TaskItem
-                                 isLoad={loadRemoveTasks} 
-                                 key={task._id} 
-                                  task={task
-                              }/>
-                          ))}
-                        </TaskContent>
-                      </TaskItemContainer>
-
-                      {/* tache en terminer */}
-                      <TaskItemContainer status="DONE">
-                        <TaskSubtitle>Terminé ({taskCount(tasks, "DONE")})</TaskSubtitle>
-                        <TaskContent>
-                        {isMoveTask?.load && isMoveTask?.status === "DONE" && (
-                           <TaskItemSkeleton />
-                        )}
-                          {sortedTasks?.filter((t: any) => t.status == "DONE").map((task: any) => (
-                             <TaskItem
-                                 isLoad={loadRemoveTasks} 
-                                 key={task._id} 
-                                 task={task}
-                              />
-                          ))}
-                        </TaskContent>
-                      </TaskItemContainer>
-
-                      {/* tache en terminer */}
-                      <TaskItemContainer status="IN_REVIEW">
-                        <TaskSubtitle>A revoir ({taskCount(tasks, "IN_REVIEW")})</TaskSubtitle>
-                        <TaskContent>
-                        {isMoveTask?.load && isMoveTask?.status === "IN_REVIEW" && (
-                           <TaskItemSkeleton />
-                        )}
-                          {sortedTasks?.filter((t: any) => t.status == "IN_REVIEW").map((task: any) => (
-                             <TaskItem
-                                 isLoad={loadRemoveTasks} 
-                                 key={task._id} 
-                                 task={task}
-                              />
-                          ))}
-                        </TaskContent>
-                      </TaskItemContainer>
-
-                      {/* tache en terminer */}
-                      <TaskItemContainer status="CANCELLED">
-                        <TaskSubtitle>Annuler ({taskCount(tasks, "CANCELLED")})</TaskSubtitle>
-                        <TaskContent>
-                        {isMoveTask?.load && isMoveTask?.status === "CANCELLED" && (
-                           <TaskItemSkeleton />
-                        )}
-                          {sortedTasks?.filter((t: any) => t.status == "CANCELLED").map((task: any) => (
-                             <TaskItem
-                                 isLoad={loadRemoveTasks} 
-                                 key={task._id} 
-                                 task={task}
-                              />
-                          ))}
-                        </TaskContent>
-                      </TaskItemContainer>
+                 <DndContext onDragEnd={handleDragEnd}>
+                  <ProjectTaskContainer project={project}>
+                      {COLUMNS.map((column) => (
+                          <TaskItemContainer key={column.id} status={column.status}>
+                            <TaskContentWrapper>
+                            <TaskSubtitle className={`sticky top-0 z-10 bg-inherit py-2`}>
+                                <div className={`${bgStatus(column.status)} translate-y-[-.7rem] py-2`}>
+                                  {column.title} ({taskCount(tasks, column.status)})
+                                </div>
+                            </TaskSubtitle>
+                              {isMoveTask?.load && isMoveTask?.status === column.status && (
+                                <TaskItemSkeleton />
+                              )}
+                              {tasks
+                                ?.filter((t: any) => t.status === column.status)
+                                .sort(
+                                  (a: any, b: any) =>
+                                    new Date(b.updatedAt).getTime() -
+                                    new Date(a.updatedAt).getTime()
+                                )
+                                .map((task: any) => (
+                                  <TaskItem
+                                    key={task._id}
+                                    isLoad={loadRemoveTasks}
+                                    task={task}
+                                  />
+                                ))}
+                            </TaskContentWrapper>
+                          </TaskItemContainer>
+                      ))}
                   </ProjectTaskContainer>
+                  </DndContext>
                 </>
                ) }
 
