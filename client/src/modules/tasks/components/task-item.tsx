@@ -11,14 +11,22 @@ import { useDeleteTask } from "../hooks/useDeleteTask";
 import { notify } from "@/core/feedback/notify";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/app/store/store";
-import { handleCreateMoveTask, handleDeleteAllTask, handleDeleteTaskInStore, handleEditTaskTitle, handleResetEditTask, handleResetMoveTask } from "@/app/store/features/taskSlice";
+import { 
+  handleCreateMoveTask, 
+  handleDeleteAllTask, 
+  handleDeleteTaskInStore, 
+  handleEditTaskTitle, 
+  handleResetEditTask, 
+  handleResetMoveTask 
+} from "@/app/store/features/taskSlice";
 import { useConfirmAction } from "@/shared/hooks/useConfirmAction";
 import { useUpdateTaskStatus } from "../hooks/useUpdateTaskStatus";
 import { TaskStatus, type TaskStatusType } from "../type";
 import EditTask from "./edit-task";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { FaRegHandRock } from "react-icons/fa";
+import { RiDragMove2Line } from "react-icons/ri";
+
 
 
 
@@ -309,7 +317,7 @@ export default function TaskItem({ task , isLoad}: Props) {
                 >
                   <Badge $variant={filterStatusBadge(task.status)}>
                     {/* {filterStatus(task.status)} */}
-                    <FaRegHandRock size={13} /> 
+                    <RiDragMove2Line size={13} />
                   </Badge>
                 </div>
 

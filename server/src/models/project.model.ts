@@ -1,4 +1,4 @@
-import { HydratedDocument, model, Schema } from "mongoose";
+import { HydratedDocument, model, Schema, Types } from "mongoose";
 
 export const ProjectStatus = {
   NOT_STARTED: "NOT_STARTED",
@@ -15,6 +15,7 @@ export interface Project {
   title: string;
   description?: string;
   status: ProjectStatusType;
+  ownerId: Types.ObjectId;
 }
 
 
@@ -39,7 +40,12 @@ const projectSchema = new Schema<Project>({
     enum: Object.values(ProjectStatus),
     default: ProjectStatus.NOT_STARTED,
   },
-
+  ownerId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+    index: true,
+  },
 }, {
   timestamps: true,
 });
@@ -47,7 +53,8 @@ const projectSchema = new Schema<Project>({
 
 const ProjectModel = model<Project>(
   "Project",
-  projectSchema
+  projectSchema,
+  "projects"
 );
 
 

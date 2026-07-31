@@ -2,7 +2,7 @@ import { HTTPSTATUS } from "@/config/http.config";
 import { asyncHandler } from "@/middlewares/asyncHandler.middleware";
 import { ProjectService } from "@/services/project.service";
 import { createProjectSchema, projectIdSchema, removeIdsSchema, updateProjectSchema } from "@/shared/validators/project.schema";
-import { Request, Response } from "express";
+import { Request, Response, RequestHandler } from "express";
 
 export class ProjectController {
     private projectService;
@@ -12,7 +12,7 @@ export class ProjectController {
         console.log(this.projectService);
     }
 
-    public create = asyncHandler(
+    public create: RequestHandler = asyncHandler(
         async (req: Request, res: Response) => {
             const body = req.body;
              console.log("API DATA :", body);
@@ -25,7 +25,7 @@ export class ProjectController {
         }
     );
 
-    public findAll = asyncHandler(
+    public findAll: RequestHandler = asyncHandler(
         async (_req: Request, res: Response) => {
             
             const projects = await this.projectService.findAll();
@@ -36,7 +36,7 @@ export class ProjectController {
         }
     );
 
-    public findById = asyncHandler(
+    public findById: RequestHandler = asyncHandler(
         async (req: Request,res: Response) => {
             const { id } = projectIdSchema.parse(req.params);
             const project = await this.projectService.findById(id);
@@ -47,7 +47,7 @@ export class ProjectController {
         }
     );
 
-    public findByIdWithAllTask = asyncHandler(
+    public findByIdWithAllTask: RequestHandler = asyncHandler(
         async (req: Request, res: Response) => {
             const { id } =  projectIdSchema.parse(req.params);
             const { project, tasks } = await this.projectService.findWithTask(id);
@@ -58,7 +58,7 @@ export class ProjectController {
         }
     );
 
-    public remove = asyncHandler(
+    public remove: RequestHandler = asyncHandler(
         async (req: Request, res: Response) => {
             const { id } = projectIdSchema.parse(req.params);
             
@@ -70,7 +70,7 @@ export class ProjectController {
         }
     );
 
-    public removeAll = asyncHandler(
+    public removeAll: RequestHandler = asyncHandler(
         async (req: Request, res: Response) => {
             const { ids } = removeIdsSchema.parse(req.body);            
             
@@ -83,7 +83,7 @@ export class ProjectController {
         }
     );
 
-    public getCount = asyncHandler(
+    public getCount: RequestHandler = asyncHandler(
         async(_req: Request, res: Response) => {
             const count = await this.projectService.getCount();
 
@@ -94,7 +94,7 @@ export class ProjectController {
         }
     );
 
-    public update = asyncHandler(
+    public update: RequestHandler = asyncHandler(
         async(req: Request, res: Response) => {
 
             console.log(req.body)

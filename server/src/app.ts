@@ -7,6 +7,7 @@ import { config } from "@/config/app.config";
 import projectRoutes from "@/routes/project.route";
 import { errorHandler } from "@/middlewares/errorHandler.middleware";
 import taskRoutes from "@/routes/task.route";
+import authRoutes from "./routes/auth.route";
 
 const app = express();
 const BASE_API = config.BASE_API || "/api/v1";
@@ -38,6 +39,7 @@ app.get("/", async function(_req: Request, res: Response) {
 });
 
 
+app.use(`${BASE_API}/auth`, authRoutes);
 app.use(`${BASE_API}/projects`, projectRoutes);
 app.use(`${BASE_API}/tasks`, taskRoutes);
 

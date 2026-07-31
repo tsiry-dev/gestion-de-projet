@@ -1,3 +1,4 @@
+import { Request, Response, RequestHandler } from "express";
 import { HTTPSTATUS } from "@/config/http.config";
 import { asyncHandler } from "@/middlewares/asyncHandler.middleware";
 import TaskModel from "@/models/task.model";
@@ -10,7 +11,6 @@ import {
     updateTaskStatusSchema 
 } from "@/shared/validators/task.schema";
 
-import { Request, Response } from "express";
 
 export class TaskController {
     private taskService;
@@ -20,7 +20,7 @@ export class TaskController {
         console.log(this.taskService);
     }
 
-    public create = asyncHandler(
+    public create: RequestHandler = asyncHandler(
         async(req: Request, res: Response) => {
             console.log(req.body);
            const body = createTaskSchema.parse(req.body);
@@ -33,7 +33,7 @@ export class TaskController {
         }
     );
 
-    public getAll = asyncHandler(
+    public getAll: RequestHandler = asyncHandler(
       async(_req: Request, res: Response) => {
            const tasks = await this.taskService.getAll();
            return res.status(200).json({
@@ -43,7 +43,7 @@ export class TaskController {
       }
     );
 
-    public findById = asyncHandler(
+    public findById: RequestHandler = asyncHandler(
         async (req: Request, res: Response) => {
             const { id } = taskIdSchema.parse(req.params);
 
@@ -56,7 +56,7 @@ export class TaskController {
         }
     );
 
-    public update = asyncHandler(
+    public update: RequestHandler = asyncHandler(
         async(req: Request, res: Response) => {
             console.log(req.body);
            const data = updateTaskSchema.parse(req.body);
@@ -69,7 +69,7 @@ export class TaskController {
         }
     );
 
-    public remove = asyncHandler(
+    public remove: RequestHandler = asyncHandler(
         async(req: Request, res: Response) => {
            const { id } = taskIdSchema.parse(req.params);
            await this.taskService.remove(id);
@@ -81,7 +81,7 @@ export class TaskController {
         }
     );
 
-    public removeAll = asyncHandler(
+    public removeAll: RequestHandler = asyncHandler(
         async(req: Request, res: Response) => {
            const { ids } =  removeTaskIdsSchema.parse(req.body);
            await this.taskService.removeAll(ids);
@@ -93,7 +93,7 @@ export class TaskController {
         }
     );
 
-    public updateStatus = asyncHandler(
+    public updateStatus: RequestHandler = asyncHandler(
     async (req: Request, res: Response) => {
         console.log(req.body);
         const body = updateTaskStatusSchema.parse(req.body);
