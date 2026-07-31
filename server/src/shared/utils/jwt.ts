@@ -9,6 +9,14 @@ export interface RefreshTokenPayload {
   userId: string;
 }
 
+export interface UserPayload {
+    userId: string;
+    iat?: number;
+    exp?: number;
+    aud?: string;
+}
+
+
 export class JwtUtils {
     public static signAccessToken(payload: AccessTokenPayload): string {
         const options: SignOptions = {

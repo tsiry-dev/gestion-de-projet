@@ -3,7 +3,9 @@ import { LoginDTO, RegisterDTO } from "@/shared/dtos/auth.dto";
 import { ConflictError } from "@/shared/errors/ConflictError";
 import { ValidationError } from "@/shared/errors/ValidationError";
 import { comparePassword } from '../shared/utils/bcript';
-import { JwtUtils } from "@/shared/utils/jwt";
+import { JwtUtils, RefreshTokenPayload } from "@/shared/utils/jwt";
+import { UnauthorizedError } from "@/shared/errors/UnauthorizedError";
+import { NotFoundError } from "@/shared/errors/NotFoundError";
 
 export class AuthService {
 
@@ -24,6 +26,7 @@ export class AuthService {
     }
 
     public async login (data: LoginDTO): Promise<{
+        user: User,
         accessToken: string,
         refreshToken: string
     }> {
@@ -62,9 +65,65 @@ export class AuthService {
         });
 
         return {
+            user: existingUser,
             accessToken, 
             refreshToken
         }
 
+    }
+
+    public async refreshToken(refreshToken: string | undefined) {
+        if (!refreshToken) {
+            throw new NotFoundError("Token non trouvé !");
+        }
+
+        let payload: RefreshTokenPayload;
+
+        try {
+            payload = JwtUtils.verifyRefreshToken(refreshToken);
+        } catch {
+            throw new UnauthorizedError("Token invalide ou expiré !");
+        }
+
+        const user = await UserModel.findById(payload.userId);
+
+        if (!user) {
+            throw new UnauthorizedError("Utilisateur introuvable.");
+        }
+
+        const newAccessToken = JwtUtils.signAccessToken({
+            userId: user._id.toString(),
+        });
+
+        const newRefreshToken = JwtUtils.signRefreshToken({
+            userId: user._id.toString(),
+        });
+
+        return {
+            newAccessToken,
+            newRefreshToken,
+        };
+    }
+
+    public async me(userId: string | undefined): Promise<User> {
+
+        if (!userId) {
+            throw new UnauthorizedError(
+                "Utilisateur non authentifié !"
+            );
+        }
+
+
+        const user = await UserModel.findById(userId);
+
+
+        if (!user) {
+            throw new NotFoundError(
+                "Utilisateur introuvable !"
+            );
+        }
+
+
+        return user;
     }
 }
