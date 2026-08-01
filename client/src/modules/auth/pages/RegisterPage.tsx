@@ -1,10 +1,47 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, type FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Button from "@/shared/components/ui/button";
+import { FormItem } from "@/shared/components/ui/form/form-item";
+import Input from "@/shared/components/ui/form/input";
+import Form from "@/shared/components/ui/form/form";
+import { useForm } from "react-hook-form";
+import { registerSchema, type RegisterForm } from "../schema/register.schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import useRegister from "../hooks/useRegister";
+import { notify } from "@/core/feedback/notify";
+import { handleApiError } from "@/core/errors/handleApiError";
+import LoaderButton from "@/shared/components/ui/loader-button";
 
 export default function RegisterPage() {
+  const [apiErrors, setApiErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
+  const { mutate: registerQuery, isPending: isRegister } = useRegister();
+  const navigate = useNavigate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: {
+      errors
+    }
+  } = useForm<RegisterForm>({
+    resolver: zodResolver(registerSchema)
+  });
+ 
+  const onSubmit = (data: RegisterForm) => {
+     console.log(navigate);
+     registerQuery(data, {
+        onSuccess: () => {
+           notify.success('Inscription avec succès!connectez-vous pour continuer.');
+           navigate('/login');
+        },
+        onError: (error) => {
+            handleApiError(error, setApiErrors);
+        },
+     });
+  }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
@@ -16,47 +53,28 @@ export default function RegisterPage() {
         <p className="mb-6 text-center text-sm text-gray-500">
           Créez votre compte pour continuer.
         </p>
+        <Form onSubmit={handleSubmit(onSubmit)}>
+          <FormItem label="Nom complet" error={errors.name?.message}>
+             <Input {...register('name')}/>
+          </FormItem>
 
-        <form className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Nom complet
-            </label>
-            <input
-              type="text"
-              placeholder="John Doe"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none transition focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Email
-            </label>
-            <input
-              type="email"
-              placeholder="john@example.com"
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 outline-none transition focus:border-blue-500"
-            />
-          </div>
+          <FormItem label="Email" error={errors.email?.message || apiErrors.email}>
+              <Input type="email" {...register('email')}/>
+          </FormItem>
 
           {/* Mot de passe */}
           <div>
-            <label className="mb-1 block text-sm font-medium">
-              Mot de passe
-            </label>
 
             <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="********"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 outline-none transition focus:border-blue-500"
-              />
+              <FormItem label="Mot de passe" error={errors.password?.message}>
+                <Input type={showPassword ? "text" : "password"} {...register('password')}/>
+              </FormItem>
+
 
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                className="absolute right-3 top-7 translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
                 {showPassword ? (
                   <FiEyeOff size={12} />
@@ -67,26 +85,18 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Confirmation */}
-          <div>
-            <label className="mb-1 block text-sm font-medium">
-              Confirmer le mot de passe
-            </label>
+          <FormItem label="Confirmer" error={errors.confirmPassword?.message}>
+             <Input type={showPassword ? "text" : "password"} {...register('confirmPassword')} />
+          </FormItem>
 
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="********"
-                className="w-full rounded-lg border border-gray-300 px-4 py-2 pr-10 outline-none transition focus:border-blue-500"
-              />
-
-            </div>
-          </div>
-
-           <Button>
-              S'inscrire
+           <Button disabled={isRegister}>
+              { isRegister ?
+                <LoaderButton title="Inscription en cours..."/>
+              :
+                "S'inscrire"
+              }
            </Button>
-        </form>
+        </Form>
 
         <p className="mt-6 text-center text-sm text-gray-600">
           Vous avez déjà un compte ?{" "}

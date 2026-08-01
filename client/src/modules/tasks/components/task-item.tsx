@@ -140,6 +140,7 @@ export default function TaskItem({ task , isLoad}: Props) {
     }}
     
     className={`
+        group
         relative mb-2 ${deleteTaskIds.includes(task._id) ? 
         'bg-red-400' : 
         'bg-white'}
@@ -312,13 +313,14 @@ export default function TaskItem({ task , isLoad}: Props) {
                   className={`
                     inline-flex
                     cursor-grab
+                    opacity-0
+                    group-hover:opacity-100
+                    transition-opacity
+                    duration-200
                     ${isDragging ? "!cursor-grabbing" : ""}
                   `}
                 >
-                  <Badge $variant={filterStatusBadge(task.status)}>
-                    {/* {filterStatus(task.status)} */}
                     <RiDragMove2Line size={13} />
-                  </Badge>
                 </div>
 
                 <h4

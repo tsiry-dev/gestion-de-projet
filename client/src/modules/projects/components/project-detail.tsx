@@ -34,6 +34,8 @@ import { useUpdateTaskStatus } from "@/modules/tasks/hooks/useUpdateTaskStatus";
 import TaskContentWrapper from "@/modules/tasks/components/task-content-wrapper";
 import { bgStatus } from "../utils";
 import { truncate } from "@/shared/utils/string.utils";
+import ListTeam from "./list-team";
+import ProjectDetailError from "./project-detail-error";
 
 
 type ColumType = {
@@ -162,187 +164,192 @@ export default function ProjectDetail() {
       );
   }
 
+  if (error) {
+    return (
+      <ProjectDetailError
+          refetch={refetch} 
+          error={error}
+      />
+    );
+  }
 
-    return <div className="h-[85vh] overflow-hidden">
-       <DialogHead
-         title={"Detail du projet"}
-         description="Vous pouvez voir tous les détail de votre projet,manager les taches, les statistiques"
-       />
+  return <div className="h-[85vh] overflow-hidden">
+      <DialogHead
+        title={"Detail du projet"}
+        description="Vous pouvez voir tous les détail de votre projet,manager les taches, les statistiques"
+      />
 
 
 
-       <div className=" flex mt-3 min-h-[60vh]">
-          <aside className="w-[20%]">
-            <div className="group flex justify-between items-start px-2">
-              <div className="flex-1">
-                {!editProject ? (
-                  <div className="project-title">
-                      <Status type={project?.status} />
-                      
-                    <h2 className="font-bold text-2xl">{project?.title}</h2>
+      <div className=" flex mt-3 min-h-[60vh]">
+        <aside className="w-[20%]">
+          <div className="group flex justify-between items-start px-2">
+            <div className="flex-1">
+              {!editProject ? (
+                <div className="project-title">
+                    <Status type={project?.status} />
+                    
+                  <h2 className="font-bold text-2xl">{project?.title}</h2>
 
-                    <Paragraphe>
-                      {project?.description}
-                    </Paragraphe>
+                  <Paragraphe>
+                    {project?.description}
+                  </Paragraphe>
 
-                    <SubTitle className="mt-4">
-                       Proprietaire: John doe
-                    </SubTitle>
-                  </div>
-                ) : (
-                  <EditProject />
-                )}
-              </div>
+                  <SubTitle className="mt-4">
+                      Proprietaire: John doe
+                  </SubTitle>
+                </div>
+              ) : (
+                <EditProject />
+              )}
+            </div>
 
-              <div className="ml-2">
-                {!editProject ? (
-                  <Button
-                    title="Modifier"
-                    onClick={() => dispatch(edit(project))}
-                    className="
-                      opacity-0
-                      invisible
-                      transition-all
-                      duration-200
-                      group-hover:opacity-100
-                      group-hover:visible
-                    "
-                  >
-                    <VscEditCompact size={15} />
-                  </Button>
-                ) : (
-                  <Button
-                    $variant="danger"
-                    onClick={() => dispatch(resetEdit())}
-                  >
-                    <MdClose size={15} />
-                  </Button>
-                )}
-              </div>
-            </div>  
-          </aside>
-          <main className="flex gap-2 border-l-1 border-gray-300 flex-1">
-            <div className="ml-3 flex-5">
+            <div className="ml-2">
+              {!editProject ? (
+                <Button
+                  title="Modifier"
+                  onClick={() => dispatch(edit(project))}
+                  className="
+                    opacity-0
+                    invisible
+                    transition-all
+                    duration-200
+                    group-hover:opacity-100
+                    group-hover:visible
+                  "
+                >
+                  <VscEditCompact size={15} />
+                </Button>
+              ) : (
+                <Button
+                  $variant="danger"
+                  onClick={() => dispatch(resetEdit())}
+                >
+                  <MdClose size={15} />
+                </Button>
+              )}
+            </div>
+          </div>  
+        </aside>
+        <main className="flex gap-2 border-l-1 border-gray-300 flex-1">
+          <div className="ml-3 flex-5">
 
-              <div className="flex justify-between">
-                <SubTitle>
-                  Tache{tasks?.length > 0 && "s"} ({tasks?.length ?? 0})
-                </SubTitle>
-                
-                <div className="flex gap-2">
-                 {!isCreateTask && <div>
-                    {ids.length > 0 &&
-                      <div className="flex gap-3">
-                        <Button 
-                           disabled={loadRemoveTasks}
-                           onClick={handleDeleteSelectedTask}
-                           $variant="danger" 
-                           className="flex items-center" 
-                           title="Supprimer tous"
-                        >
-                          {loadRemoveTasks ?
-                           <span className="text-white flex items-center gap-2">
-                             <LoaderButton title="Suppression en cours..."/>
-                           </span>
-                          :
-                            <span className="flex items-center">
-                               <GoTrash size={13} /> &nbsp; ({ ids.length })
-                            </span>
-                          }
-                        </Button>
-            
-            
-                        <Button 
-                            title="Annuler tous" 
-                            $variant="warning" 
-                            onClick={() => dispatch(handleResetDeleteTaskIds())}
-                        >
-                          <TfiClose />
-                        </Button>
-                      </div>
-                    }
-                 </div>
-                 }
-
-                  <Button 
-                      $variant={isCreateTask ? 'danger': 'primary'}  
-                      onClick={() => dispatch(handleToggleCreateTask())}
-                  >
-                  {isCreateTask ? 
-                    <div className="flex">
-                      Fermer &nbsp;
-                      <MdClose size={15}/>
-                    </div>
-                  
-                    :
-                    <div className="flex" title="Nouveau tache">
-                      Nouveau &nbsp;
-                      <HiMiniPlus size={15}/>
+            <div className="flex justify-between">
+              <SubTitle>
+                Tache{tasks?.length > 0 && "s"} ({tasks?.length ?? 0})
+              </SubTitle>
+              
+              <div className="flex gap-2">
+                {!isCreateTask && <div>
+                  {ids.length > 0 &&
+                    <div className="flex gap-3">
+                      <Button 
+                          disabled={loadRemoveTasks}
+                          onClick={handleDeleteSelectedTask}
+                          $variant="danger" 
+                          className="flex items-center" 
+                          title="Supprimer tous"
+                      >
+                        {loadRemoveTasks ?
+                          <span className="text-white flex items-center gap-2">
+                            <LoaderButton title="Suppression en cours..."/>
+                          </span>
+                        :
+                          <span className="flex items-center">
+                              <GoTrash size={13} /> &nbsp; ({ ids.length })
+                          </span>
+                        }
+                      </Button>
+          
+          
+                      <Button 
+                          title="Annuler tous" 
+                          $variant="warning" 
+                          onClick={() => dispatch(handleResetDeleteTaskIds())}
+                      >
+                        <TfiClose />
+                      </Button>
                     </div>
                   }
-                  </Button>
                 </div>
+                }
+
+                <Button 
+                    $variant={isCreateTask ? 'danger': 'primary'}  
+                    onClick={() => dispatch(handleToggleCreateTask())}
+                >
+                {isCreateTask ? 
+                  <div className="flex">
+                    Fermer &nbsp;
+                    <MdClose size={15}/>
+                  </div>
+                
+                  :
+                  <div className="flex" title="Nouveau tache">
+                    Nouveau &nbsp;
+                    <HiMiniPlus size={15}/>
+                  </div>
+                }
+                </Button>
               </div>
-
-
-
-              {error?.message && (
-                <ServerError
-                  message={error.message}
-                  refetch={refetch}
-                />
-              )}
-
-               {/* Tache à faire  */}
-               {isCreateTask ? (
-                  <TaskCreate />
-               ) : (
-                <>
-                 <DndContext onDragEnd={handleDragEnd}>
-                  <ProjectTaskContainer project={project}>
-                      {COLUMNS.map((column) => (
-                          <TaskItemContainer key={column.id} status={column.status}>
-                            <TaskContentWrapper>
-                            <TaskSubtitle className={`sticky top-0 z-10 bg-inherit py-2`}>
-                                <div className={`${bgStatus(column.status)} translate-y-[-.7rem] py-2`}>
-                                  {column.title} ({taskCount(tasks, column.status)})
-                                </div>
-                            </TaskSubtitle>
-                              {isMoveTask?.load && isMoveTask?.status === column.status && (
-                                <TaskItemSkeleton />
-                              )}
-                              {tasks
-                                ?.filter((t: any) => t.status === column.status)
-                                .sort(
-                                  (a: any, b: any) =>
-                                    new Date(b.updatedAt).getTime() -
-                                    new Date(a.updatedAt).getTime()
-                                )
-                                .map((task: any) => (
-                                  <TaskItem
-                                    key={task._id}
-                                    isLoad={loadRemoveTasks}
-                                    task={task}
-                                  />
-                                ))}
-                            </TaskContentWrapper>
-                          </TaskItemContainer>
-                      ))}
-                  </ProjectTaskContainer>
-                  </DndContext>
-                </>
-               ) }
-
-
-
             </div>
 
-            <div className="flex-1 border-l-1 border-gray-300 px-2">
-                <SubTitle>
-                  Equipes
-                </SubTitle>
-            </div>
-          </main>
-       </div>
-    </div>
+
+
+            {error && (
+              <ServerError
+                message={(error as Error).message}
+                refetch={refetch}
+              />
+            )}
+
+              {/* Tache à faire  */}
+              {isCreateTask ? (
+                <TaskCreate />
+              ) : (
+              <>
+                <DndContext onDragEnd={handleDragEnd}>
+                <ProjectTaskContainer project={project}>
+                    {COLUMNS.map((column) => (
+                        <TaskItemContainer key={column.id} status={column.status}>
+                          <TaskContentWrapper>
+                          <TaskSubtitle className={`sticky top-0 z-10 bg-inherit py-2`}>
+                              <div className={`${bgStatus(column.status)} translate-y-[-.7rem] py-2`}>
+                                {column.title} ({taskCount(tasks, column.status)})
+                              </div>
+                          </TaskSubtitle>
+                            {isMoveTask?.load && isMoveTask?.status === column.status && (
+                              <TaskItemSkeleton />
+                            )}
+                            {tasks
+                              ?.filter((t: any) => t.status === column.status)
+                              .sort(
+                                (a: any, b: any) =>
+                                  new Date(b.updatedAt).getTime() -
+                                  new Date(a.updatedAt).getTime()
+                              )
+                              .map((task: any) => (
+                                <TaskItem
+                                  key={task._id}
+                                  isLoad={loadRemoveTasks}
+                                  task={task}
+                                />
+                              ))}
+                          </TaskContentWrapper>
+                        </TaskItemContainer>
+                    ))}
+                </ProjectTaskContainer>
+                </DndContext>
+              </>
+              ) }
+
+
+
+          </div>
+
+            {/* Liste des teams  */}
+            <ListTeam />
+        </main>
+      </div>
+  </div>
 }

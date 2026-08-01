@@ -6,18 +6,18 @@
 export const API_BASE = "/api";
 
 export const ENDPOINTS = {
-  // AUTH: {
-  //   LOGIN: "/auth/login",
-  //   REGISTER: "/auth/register",
-  //   REFRESH: "/auth/refresh",
-  //   RESEND_EMAIL: "/auth/resend/email",
-  //   REMOVE_SESSION: "/auth/remove/session",
-  //   LOGOUT: "/auth/logout/:userId",
-  //   LOGOUT_ALL: "/auth/logout/all",
-  //   SEND_EMAIL_PASSWORD_RESET: "/auth/send/email/reset-password",
-  //   RESET_PASSWORD: "/auth/reset/password",
-  //   ME: "/auth/me",
-  // },
+  AUTH: {
+    LOGIN: "/auth/login",
+    REGISTER: "/auth/register",
+    REFRESH: "/auth/refresh",
+    RESEND_EMAIL: "/auth/resend/email",
+    REMOVE_SESSION: "/auth/remove/session",
+    LOGOUT: "/auth/logout/:userId",
+    LOGOUT_ALL: "/auth/logout/all",
+    SEND_EMAIL_PASSWORD_RESET: "/auth/send/email/reset-password",
+    RESET_PASSWORD: "/auth/reset/password",
+    ME: "/auth/me",
+  },
 
   PROJECT: {
     COUNT: "/projects/count",
