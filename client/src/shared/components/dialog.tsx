@@ -32,7 +32,7 @@ const sizes = {
   lg: "max-w-2xl",
   xl: "max-w-5xl",
   xxl: "max-w-7xl",
-  xxxl: "max-w-[110rem]",
+  xxxl: "max-w-[95rem]",
   full: "max-w-full mx-5",
 };
 

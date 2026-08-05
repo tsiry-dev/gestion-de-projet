@@ -1,29 +1,109 @@
 import ProjectModel, { Project } from '@/models/project.model';
 import TaskModel, { Task } from '@/models/task.model';
+import TeamModel, { Team } from '@/models/team.model';
 import { ConflictError } from '@/shared/errors/ConflictError';
 import { NotFoundError } from '@/shared/errors/NotFoundError';
+import { generateTeamCode } from '@/shared/utils/uuid';
 import { CreateProjectDTO, UpdateProjectDTO } from '@/shared/validators/project.schema';
+import mongoose from 'mongoose';
 
 export class ProjectService {
+
     public async create(data: CreateProjectDTO): Promise<Project> {
-       const { title, description } = data;
 
-       const existingProject = await ProjectModel.findOne({ title });
+        const session = await mongoose.startSession();
 
-       if (existingProject) {
-           throw new ConflictError(
-               'Le projet existe déjà', 
-               {
-                   title: 'Le projet existe déjà dans la base de données',
-               }
-           );
-       }
+        try {
 
-       return ProjectModel.create({ title, description });
+            session.startTransaction();
+
+            const { title, description, ownerId } = data;
+
+
+            const existingProject = await ProjectModel.findOne({ title })
+                .session(session);
+
+
+            if(existingProject){
+                throw new ConflictError(
+                    'Le projet existe déjà',
+                    {
+                        title: 'Le projet existe déjà dans la base de données',
+                    }
+                );
+            }
+
+
+            // 1 - Création du projet
+            const [project] = await ProjectModel.create(
+                [
+                    {
+                        title,
+                        description,
+                        ownerId
+                    }
+                ],
+                {
+                    session
+                }
+            );
+
+            if(!project) {
+                throw new NotFoundError(
+                    "Le projet n'a pas pu être créé"
+                );
+            }
+
+
+            await TeamModel.create(
+                [
+                    {
+                        name: `team-${generateTeamCode()}`,
+                        projectId: project._id,
+                        members: [
+                            {
+                                userId: ownerId,
+                                role: "OWNER"
+                            }
+                        ]
+                    }
+                ],
+                {
+                    session
+                }
+            );
+
+
+            // Valide la transaction
+            await session.commitTransaction();
+
+
+            return project;
+
+
+        } catch(error) {
+
+            // Annule toutes les opérations
+            await session.abortTransaction();
+
+            throw error;
+
+        } finally {
+
+            // Libère la session
+            session.endSession();
+
+        }
     }
 
-    public async findAll() {
+    public async findAll(ownerId: string) {
+
         return ProjectModel.aggregate([
+            {
+                $match: {
+                    ownerId: new mongoose.Types.ObjectId(ownerId)
+                }
+            },
             {
                 $lookup: {
                     from: "tasks",
@@ -35,7 +115,7 @@ export class ProjectService {
             {
                 $addFields: {
                     taskCount: {
-                    $size: "$tasks",
+                        $size: "$tasks",
                     },
                 },
             },
@@ -59,12 +139,18 @@ export class ProjectService {
         return project;
     }
 
-    public async findWithTask(id: string): Promise<{ project: Project, tasks: Task[] }> {
+    public async findWithTask(id: string): Promise<{ 
+        project: Project, 
+        tasks: Task[],
+        team: Team | null
+    }> {
+
         const project = await ProjectModel.findById(id);
 
         if (!project) {
             throw new NotFoundError("Projet introuvable.");
         }
+
 
         const tasks = await TaskModel.find({
             projectId: project._id,
@@ -72,9 +158,21 @@ export class ProjectService {
             createdAt: -1
         });
 
+
+        const team = await TeamModel
+            .findOne({
+                projectId: project._id,
+            })
+            .populate({
+                path: "members.userId",
+                select: "name email"
+            });
+
+
         return {
             project,
-            tasks
+            tasks,
+            team
         };
     }
 

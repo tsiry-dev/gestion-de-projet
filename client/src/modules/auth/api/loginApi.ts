@@ -1,6 +1,9 @@
 import { ENDPOINTS } from "@/core/api/endpoint";
-import api from "@/core/api/httpClient";
+import type { LoginDTO } from "../dto/login.dto";
+import publicApi from "@/core/api/publicHttpClient";
 
-export default function loginApi() {
-    const response = api.post(ENDPOINTS.AUTH.LOGIN);
+export default async function loginApi(data: LoginDTO): Promise<any> {
+   const response = await publicApi.post(ENDPOINTS.AUTH.LOGIN, data);
+
+   return response;
 }

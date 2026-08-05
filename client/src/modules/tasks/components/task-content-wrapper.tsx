@@ -9,7 +9,7 @@ export default function TaskContentWrapper({children}: Props) {
 
   const { active } = useDndContext();
 
-  console.log("dragging :", !!active);
+  // console.log("dragging :", !!active);
 
   return (
     <TaskContent $isDragging={!!active}>

@@ -7,7 +7,7 @@ type Props = {
 }
 
 export default function ProjectTaskContainer({ children, project }: Props) {
-  console.log(project)
+  // console.log(project)
     return (
       <div
         className={`

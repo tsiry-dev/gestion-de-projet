@@ -72,4 +72,19 @@ export class AuthController {
       }
    );
 
+   public logout: RequestHandler = asyncHandler(
+      async (_req: Request, res: Response) => {
+
+         res.clearCookie("refresh_token", {
+               httpOnly: true,
+               secure: process.env.NODE_ENV === "production",
+               sameSite: "strict",
+         });
+
+         return res.status(200).json({
+               message: "Déconnexion réussie"
+         });
+      }
+   );
+
 }

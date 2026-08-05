@@ -4,7 +4,7 @@ import getAllProjectService from "@modules/projects/services/getAllProjects.serv
 const useGetAllProject = () => {
     return useQuery({
         queryKey: ['projects'],
-        queryFn: getAllProjectService
+        queryFn:  getAllProjectService
     });
 }
 

@@ -1,6 +1,6 @@
 import { ENDPOINTS } from "@/core/api/endpoint"
-import api from "@/core/api/httpClient"
+import privateApi from "@/core/api/privateHttpClient";
 
 export const deleteProjectApi = async(id: string): Promise<any>  => {
-    await api.delete(ENDPOINTS.PROJECT.DELETE(id));
+    await privateApi.delete(ENDPOINTS.PROJECT.DELETE(id));
 }

@@ -1,13 +1,13 @@
 import { ENDPOINTS } from "@/core/api/endpoint"
-import api from "@/core/api/httpClient"
 import type { Project } from "../type";
+import privateApi from "@/core/api/privateHttpClient";
 
 type ProjectResponse = {
     projects: Project[]
 } 
 
 const getAllProjectsApi = async (): Promise<ProjectResponse> => {
-    const response = await api.get(ENDPOINTS.PROJECT.FINDALL);
+    const response = await privateApi.get(ENDPOINTS.PROJECT.FINDALL);
     return response.data;
 }
 

@@ -1,25 +1,49 @@
-import { HydratedDocument, model, Schema, Types } from "mongoose";
+// team.model.ts
+
+import mongoose, { Schema, model } from "mongoose";
 
 export interface Team {
-  name: string;
-  projectId: Types.ObjectId; // relation 1-1 : un seul projet par team
+    name: string;
+
+    projectId: mongoose.Types.ObjectId;
+
+    members: {
+        userId?: mongoose.Types.ObjectId | null;
+
+        role: "OWNER" | "MANAGER" | "MEMBER";
+    }[];
 }
+const teamSchema = new Schema({
 
-export type TeamDocument = HydratedDocument<Team>;
+    name: {
+        type: String,
+        required: true,
+    },
 
-const teamSchema = new Schema<Team>({
-  name: { type: String, required: true, trim: true },
-  projectId: {
-    type: Schema.Types.ObjectId,
-    ref: "Project",
-    required: true,
-    unique: true, // <- garantit le 1-1
-  },
-}, { timestamps: true });
+    projectId: {
+        type: Schema.Types.ObjectId,
+        ref: "Project",
+        required: true,
+    },
 
-const TeamModel = model<Team>(
-    "Team", 
-    teamSchema,
-    "teams"
-);
+    members: [
+        {
+            userId: {
+                type: Schema.Types.ObjectId,
+                ref: "User",
+            },
+
+            role: {
+                type: String,
+                enum: ["OWNER", "MANAGER","MEMBER"],
+                default: "MEMBER"
+            }
+        }
+    ]
+
+}, {
+    timestamps: true
+});
+
+const TeamModel = model("Team", teamSchema, "teams");
 export default TeamModel;

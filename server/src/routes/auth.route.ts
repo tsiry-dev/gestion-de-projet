@@ -9,5 +9,6 @@ authRoutes.post("/register", authController.register);
 authRoutes.post("/login", authController.login);
 authRoutes.post("/refresh", authController.refreshToken);
 authRoutes.get("/me", authenticate ,authController.me);
+authRoutes.post("/logout",authController.logout);
 
 export default authRoutes;

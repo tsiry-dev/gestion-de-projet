@@ -34,8 +34,11 @@ import { useUpdateTaskStatus } from "@/modules/tasks/hooks/useUpdateTaskStatus";
 import TaskContentWrapper from "@/modules/tasks/components/task-content-wrapper";
 import { bgStatus } from "../utils";
 import { truncate } from "@/shared/utils/string.utils";
-import ListTeam from "./list-team";
+import ListTeam from "../../teams/components/list-team";
 import ProjectDetailError from "./project-detail-error";
+import ReactECharts from "echarts-for-react";
+import useChartPie from "../hooks/useChartPie";
+
 
 
 type ColumType = {
@@ -89,6 +92,9 @@ export default function ProjectDetail() {
    const {confirm} = useConfirmAction();
    const { mutate: updateTaskStatusQuery } = useUpdateTaskStatus(projectId);
    const { active } = useDndContext();
+   const { chartOption } = useChartPie(data?.tasks ?? []);
+
+   console.log(data);
 
    useEffect(() => {
      dispatch(handleResetDeleteTaskIds())
@@ -182,6 +188,7 @@ export default function ProjectDetail() {
 
 
       <div className=" flex mt-3 min-h-[60vh]">
+       {/* Sidebar  */}
         <aside className="w-[20%]">
           <div className="group flex justify-between items-start px-2">
             <div className="flex-1">
@@ -194,10 +201,6 @@ export default function ProjectDetail() {
                   <Paragraphe>
                     {project?.description}
                   </Paragraphe>
-
-                  <SubTitle className="mt-4">
-                      Proprietaire: John doe
-                  </SubTitle>
                 </div>
               ) : (
                 <EditProject />
@@ -229,8 +232,30 @@ export default function ProjectDetail() {
                 </Button>
               )}
             </div>
-          </div>  
+          </div> 
+
+        {!editProject && (
+          <div>
+              <SubTitle>
+                Statistiques
+              </SubTitle> 
+              <div className="m-3 rounded-lg border border-gray-200 bg-white p-3">
+                {/* Chart */}
+                <div className="mt-8 h-[350px]">
+                  <ReactECharts
+                    option={chartOption}
+                    style={{
+                      height: "100%",
+                      width: "100%",
+                    }}
+                  />
+                </div>
+              </div>
+          </div>
+        )}
         </aside>
+
+      {/* main content  */}
         <main className="flex gap-2 border-l-1 border-gray-300 flex-1">
           <div className="ml-3 flex-5">
 
@@ -348,7 +373,7 @@ export default function ProjectDetail() {
           </div>
 
             {/* Liste des teams  */}
-            <ListTeam />
+            <ListTeam team={data.team} />
         </main>
       </div>
   </div>

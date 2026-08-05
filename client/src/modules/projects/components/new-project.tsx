@@ -12,11 +12,15 @@ import { notify } from "@/core/feedback/notify";
 import LoaderDelete from "@/shared/components/loader-delete";
 import { handleApiError } from "@/core/errors/handleApiError";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/app/store/store";
+import LoaderButton from "@/shared/components/ui/loader-button";
 
 
 export default function NewProject() {
     const [apiErrors, setApiErrors] = useState<Record<string, string>>({});
     const { mutate: createProject, isPending, error} = useCreateProject();
+    const { user } = useSelector((state: RootState) => state.session);
 
     const {
         register,
@@ -27,7 +31,8 @@ export default function NewProject() {
         resolver: zodResolver(createProjectSchema),
         defaultValues: {
             title: "",
-            description: ""
+            description: "",
+            ownerId: user?._id || ""
         }
     });
 
@@ -56,9 +61,9 @@ export default function NewProject() {
             <FormItem error={errors.description?.message} label="Description du projet">
                 <Textarea disabled={isPending} {...register('description')} />
             </FormItem>
-            <Button disabled={isPending} className="">
+            <Button  disabled={isPending} className="">
               {isPending ?
-                <LoaderDelete />
+                <LoaderButton title="Ajout en cours..."/>
                :
                  "Ajouté"
                }

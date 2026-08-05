@@ -1,5 +1,5 @@
 import { ENDPOINTS } from "@/core/api/endpoint";
-import api from "@/core/api/httpClient";
+import privateApi from "@/core/api/privateHttpClient";
 
 type UpdateProjectPayload = {
   id: string;
@@ -13,7 +13,7 @@ export const updateProjectApi = async (
   data: UpdateProjectPayload
 ) => {
 
-  const response = await api.patch(
+  const response = await privateApi.patch(
     ENDPOINTS.PROJECT.UPDATE,
     data
   );

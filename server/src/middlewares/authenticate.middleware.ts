@@ -9,12 +9,13 @@ export const authenticate: RequestHandler = asyncHandler(
 
         const authHeader = req.headers.authorization;
 
-        if (!authHeader) {
-            throw new NotFoundError("Token non trouvé !");
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedError("Authentification requise.");
         }
 
 
         const token = authHeader.split(" ")[1];
+        console.log("Backend receive token: ",token);
 
         if (!token) {
             throw new NotFoundError("Token non trouvé !");

@@ -1,6 +1,7 @@
 import { HTTPSTATUS } from "@/config/http.config";
 import { asyncHandler } from "@/middlewares/asyncHandler.middleware";
 import { ProjectService } from "@/services/project.service";
+import { UnauthorizedError } from "@/shared/errors/UnauthorizedError";
 import { createProjectSchema, projectIdSchema, removeIdsSchema, updateProjectSchema } from "@/shared/validators/project.schema";
 import { Request, Response, RequestHandler } from "express";
 
@@ -15,8 +16,11 @@ export class ProjectController {
     public create: RequestHandler = asyncHandler(
         async (req: Request, res: Response) => {
             const body = req.body;
-             console.log("API DATA :", body);
-            const projectData = createProjectSchema.parse(body);
+            const data = {
+                ownerId: req.user?.userId,
+                ...body
+            }
+            const projectData = createProjectSchema.parse(data);
             const project = await this.projectService.create(projectData);
 
             return res.status(HTTPSTATUS.CREATED).json({
@@ -26,9 +30,15 @@ export class ProjectController {
     );
 
     public findAll: RequestHandler = asyncHandler(
-        async (_req: Request, res: Response) => {
-            
-            const projects = await this.projectService.findAll();
+        async (req: Request, res: Response) => {
+            const ownerId = req.user?.userId;
+
+            if(!ownerId){
+                throw new UnauthorizedError(
+                    "Utilisateur non authentifié"
+                );
+            }
+            const projects = await this.projectService.findAll(ownerId);
 
             return res.status(HTTPSTATUS.OK).json({
                 projects
@@ -50,10 +60,10 @@ export class ProjectController {
     public findByIdWithAllTask: RequestHandler = asyncHandler(
         async (req: Request, res: Response) => {
             const { id } =  projectIdSchema.parse(req.params);
-            const { project, tasks } = await this.projectService.findWithTask(id);
+            const { project, tasks, team } = await this.projectService.findWithTask(id);
 
             return res.status(HTTPSTATUS.OK).json({
-                project, tasks
+                project, tasks, team
             })
         }
     );

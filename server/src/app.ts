@@ -8,6 +8,8 @@ import projectRoutes from "@/routes/project.route";
 import { errorHandler } from "@/middlewares/errorHandler.middleware";
 import taskRoutes from "@/routes/task.route";
 import authRoutes from "./routes/auth.route";
+import { authenticate } from "./middlewares/authenticate.middleware";
+import teamRoutes from "./routes/team.route";
 
 const app = express();
 const BASE_API = config.BASE_API || "/api/v1";
@@ -31,7 +33,6 @@ app.use(express.json());
 app.use(cookieParser()); 
 
 
-
 app.get("/", async function(_req: Request, res: Response) {
     res.json({
         message: "Server is runing"
@@ -40,8 +41,9 @@ app.get("/", async function(_req: Request, res: Response) {
 
 
 app.use(`${BASE_API}/auth`, authRoutes);
-app.use(`${BASE_API}/projects`, projectRoutes);
-app.use(`${BASE_API}/tasks`, taskRoutes);
+app.use(`${BASE_API}/projects`,authenticate, projectRoutes);
+app.use(`${BASE_API}/tasks`, authenticate, taskRoutes);
+app.use(`${BASE_API}/teams`, authenticate, teamRoutes);
 
 app.use(errorHandler);
 

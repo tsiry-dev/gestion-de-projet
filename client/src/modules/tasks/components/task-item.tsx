@@ -26,6 +26,10 @@ import EditTask from "./edit-task";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
 import { RiDragMove2Line } from "react-icons/ri";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { IoMdClose } from "react-icons/io";
+
+
 
 
 
@@ -133,11 +137,7 @@ export default function TaskItem({ task , isLoad}: Props) {
       zIndex: isDragging ? 9999 : undefined,
       position: isDragging ? "relative" : undefined,
     }}
-    onClick={() => {
-      if (!taskEdit || taskEdit._id !== task._id) {
-        dispatch(handleDeleteAllTask(task._id));
-      }
-    }}
+
     
     className={`
         group
@@ -307,20 +307,36 @@ export default function TaskItem({ task , isLoad}: Props) {
           :
             (
               <div>
-                <div
-                  {...listeners}
-                  {...attributes}
-                  className={`
-                    inline-flex
-                    cursor-grab
-                    opacity-0
-                    group-hover:opacity-100
-                    transition-opacity
-                    duration-200
-                    ${isDragging ? "!cursor-grabbing" : ""}
-                  `}
-                >
-                    <RiDragMove2Line size={13} />
+                <div className="
+                      opacity-0
+                      group-hover:opacity-100
+                      transition-opacity
+                      duration-200 flex gap-2">
+                  <div
+                    {...listeners}
+                    {...attributes}
+                    className={`
+                      inline-flex
+                      cursor-grab
+                      ${isDragging ? "!cursor-grabbing" : ""}
+                    `}
+                  >
+                      <RiDragMove2Line size={13} />
+                  </div>
+                  <div 
+                      onClick={() => {
+                        if (!taskEdit || taskEdit._id !== task._id) {
+                          dispatch(handleDeleteAllTask(task._id));
+                        }
+                      }}
+                      className="cursor-pointer hover:text-red-500 transition"
+                  >
+                     {deleteTaskIds.includes(task._id) ? (
+                        <IoMdClose  size={13} className="text-white"/>
+                     ) : (
+                      <FaRegTrashAlt size={13} />
+                     )}
+                  </div>
                 </div>
 
                 <h4

@@ -74,7 +74,9 @@ export class AuthService {
 
     public async refreshToken(refreshToken: string | undefined) {
         if (!refreshToken) {
-            throw new NotFoundError("Token non trouvé !");
+            throw new UnauthorizedError(
+                "Session inexistante."
+            );
         }
 
         let payload: RefreshTokenPayload;

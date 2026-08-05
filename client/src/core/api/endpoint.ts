@@ -12,7 +12,7 @@ export const ENDPOINTS = {
     REFRESH: "/auth/refresh",
     RESEND_EMAIL: "/auth/resend/email",
     REMOVE_SESSION: "/auth/remove/session",
-    LOGOUT: "/auth/logout/:userId",
+    LOGOUT: "/auth/logout",
     LOGOUT_ALL: "/auth/logout/all",
     SEND_EMAIL_PASSWORD_RESET: "/auth/send/email/reset-password",
     RESET_PASSWORD: "/auth/reset/password",
@@ -36,6 +36,10 @@ export const ENDPOINTS = {
     DELETEALL: "/tasks/remove/all",
     UPDATESTATUS: "/tasks/update/status",
     UPDATE : "/tasks/update"
+  },
+  TEAMS: {
+    SEARCH: (query: string) => `/teams/search?query=${encodeURIComponent(query)}`,
+    ADD: `/teams/add`
   }
 
 } as const;

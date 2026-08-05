@@ -8,7 +8,9 @@ export const createProjectSchema = z.object({
              .min(2)
              .nonempty('Le titre est requis'),
 
-    description: z.string()
+    description: z.string(),
+    ownerId: z.string()
+             .nonempty('L\'id du propriétaire est requis'),
 });
 
 

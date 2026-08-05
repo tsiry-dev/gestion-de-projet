@@ -1,7 +1,7 @@
 import { ENDPOINTS } from "@/core/api/endpoint"
-import api from "@/core/api/httpClient"
+import privateApi from "@/core/api/privateHttpClient";
 import type { ProjectCountResponse } from "@modules/dashboard/type";
 
 export const projectCountApi = async() => {
-    return api.get<ProjectCountResponse>(ENDPOINTS.PROJECT.COUNT);
+    return privateApi.get<ProjectCountResponse>(ENDPOINTS.PROJECT.COUNT);
 }
