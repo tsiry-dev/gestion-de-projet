@@ -9,7 +9,7 @@ export class TaskService {
     }
 
     public async getAll(): Promise<Task[]> {
-       return await TaskModel.find();
+       return await TaskModel.find().populate('teamId');
     }
 
     public async find(id: string): Promise<Task | null> {

@@ -21,15 +21,17 @@ import TeamItem from "./team-item";
 
 type Props = {
   team: any;
+  project: any
 };
 
-export default function ListTeam({ team }: Props) {
+export default function ListTeam({ team , project}: Props) {
   const [addingUserId, setAddingUserId] = useState<string | null>(null);
   const { members = [] } = team;
   const [isNewMember, setIsNewMember] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("query") ?? "";
   const [editRoleTeam, setEditRoleTeam] = useState<string | null>(null);
+  const { user } = useSelector((state: RootState) => state.session);
 
 
   const {
@@ -94,23 +96,25 @@ export default function ListTeam({ team }: Props) {
     <div className="w-[200px] shrink-0 border-l border-gray-300 px-2">
       <div className="flex items-center justify-between">
         <SubTitle>
-          Equipes ({members.length})
+          Equipes ({members.filter((m: any) => m.role !== RoleTeam.OWNER).length})
         </SubTitle>
 
-        <Badge
-          $variant={isNewMember ? "danger" : "primary"}
-          title={isNewMember ? "Annuler" : "Ajouter un membre"}
-          onClick={() => {
-            setIsNewMember(!isNewMember);
+        {project?.ownerId == user?._id && (
+          <Badge
+            $variant={isNewMember ? "danger" : "primary"}
+            title={isNewMember ? "Annuler" : "Ajouter un membre"}
+            onClick={() => {
+              setIsNewMember(!isNewMember);
 
-            if (isNewMember) {
-              setSearchParams({});
-            }
-          }}
-        >
+              if (isNewMember) {
+                setSearchParams({});
+              }
+            }}
+          >
 
-          {isNewMember ? <IoMdClose size={15} /> : <IoIosSearch size={15} />}
-        </Badge>
+            {isNewMember ? <IoMdClose size={15} /> : <IoIosSearch size={15} />}
+          </Badge>
+        )}
 
       </div>
       
@@ -136,7 +140,9 @@ export default function ListTeam({ team }: Props) {
           {isPendingSearchTeam ? (
             <TeamSearchSkeleton />
           ) : (
-            <div className="space-y-2 overflow-y-scroll">
+            <div 
+            
+              className="space-y-2 ">
               {availableUsers.length ? (
                 availableUsers.map((user: any) => (
                   <div
@@ -190,10 +196,24 @@ export default function ListTeam({ team }: Props) {
       {/* Members */}
       {(!isNewMember || !isSearching) && (
 
-        <div className="mt-3 space-y-2 h-[450px] overflow-y-scroll bg-gray-200 p-2">
+        <div className="mt-3 space-y-2 h-[450px] 
+                      overflow-y-auto
+                      [scrollbar-width:thin]
+                      [&::-webkit-scrollbar]:w-1.5
+                      [&::-webkit-scrollbar-track]:bg-transparent
+                      [&::-webkit-scrollbar-thumb]:bg-gray-300
+                      [&::-webkit-scrollbar-thumb]:rounded-full
+                      hover:[&::-webkit-scrollbar-thumb]:bg-gray-400
+         bg-gray-200 p-2">
 
           {members.map((member: any) => (
-             <TeamItem key={member.userId?._id} member={member} />
+            <div>
+                {member.userId._id !== project.ownerId && (
+                  <div>
+                    <TeamItem key={member.userId?._id} member={member} project={project} />
+                  </div>
+                )}
+            </div>
           ))}
 
         </div>

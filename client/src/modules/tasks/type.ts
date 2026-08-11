@@ -14,8 +14,8 @@ export type TaskType = {
     projectId: string;
     title: string,
     status: TaskStatusType,
+    teamId: string | null
 }
-
 
 export type UpdateTaskStatusDTO = {
   taskId: string;

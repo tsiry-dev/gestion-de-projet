@@ -96,12 +96,27 @@ export class ProjectService {
         }
     }
 
-    public async findAll(ownerId: string) {
+    public async findAll(userId: string) {
 
         return ProjectModel.aggregate([
             {
+                $lookup: {
+                    from: "teams",
+                    localField: "_id",
+                    foreignField: "projectId",
+                    as: "team",
+                },
+            },
+            {
                 $match: {
-                    ownerId: new mongoose.Types.ObjectId(ownerId)
+                    $or: [
+                        {
+                            ownerId: new mongoose.Types.ObjectId(userId)
+                        },
+                        {
+                            "team.members.userId": new mongoose.Types.ObjectId(userId)
+                        }
+                    ]
                 }
             },
             {
@@ -154,7 +169,12 @@ export class ProjectService {
 
         const tasks = await TaskModel.find({
             projectId: project._id,
-        }).sort({
+        })
+        .populate({
+            path: "teamId",
+            select: "name email avatar",
+        })
+        .sort({
             createdAt: -1
         });
 

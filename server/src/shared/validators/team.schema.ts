@@ -6,3 +6,10 @@ export const addTeamSchema = z.object({
 });
 
 export type AddTeamDTO = z.infer<typeof addTeamSchema>;
+
+export const reassignTeamSchema = z.object({
+  taskId: z.string(),
+  teamId: z.string(),
+});
+
+export type ReassignTeamDTO = z.infer<typeof reassignTeamSchema>;

@@ -17,7 +17,9 @@ import {
   handleDeleteTaskInStore, 
   handleEditTaskTitle, 
   handleResetEditTask, 
-  handleResetMoveTask 
+  handleResetMoveTask, 
+  removeReassignTaskTeamId, 
+  setReassignTaskTeamId
 } from "@/app/store/features/taskSlice";
 import { useConfirmAction } from "@/shared/hooks/useConfirmAction";
 import { useUpdateTaskStatus } from "../hooks/useUpdateTaskStatus";
@@ -28,15 +30,20 @@ import { CSS } from "@dnd-kit/utilities";
 import { RiDragMove2Line } from "react-icons/ri";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
-
-
+import { MdOutlineAssignmentInd } from "react-icons/md";
+import { setReassignTeamStore } from "@/app/store/features/teamSlice";
+import useGetProjectWithTasks from "@/modules/projects/hooks/useGetProjectWithTask";
+import { IoIosArrowRoundBack } from "react-icons/io";
+import Button from "@/shared/components/ui/button";
+import TeamReassignForm from "@/modules/teams/components/team-reassign-form";
 
 
 
 
 type Props = {
   task: any;
-  isLoad: boolean
+  isLoad: boolean,
+  project: any
 };
 
 const statusBtns = [
@@ -62,11 +69,12 @@ const statusBtns = [
    },
 ];
 
-export default function TaskItem({ task , isLoad}: Props) {
+export default function TaskItem({ task , isLoad, project}: Props) {
   const [showFullTitle, setShowFullTitle] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
   const { projectDetailId: projectId } = useSelector((state: RootState) => state.projects);
-  const { deleteTaskIds, taskEdit, isMoveTask } = useSelector((state: RootState) => state.tasks);
+  const { user } = useSelector((state: RootState) => state.session);
+  const { deleteTaskIds, taskEdit, isMoveTask,reassignTaskId } = useSelector((state: RootState) => state.tasks);
   const { mutate: deleteTask, isPending, error } = useDeleteTask(task._id, projectId);
   const dispatch = useDispatch();
   const {confirm} = useConfirmAction();
@@ -84,6 +92,12 @@ export default function TaskItem({ task , isLoad}: Props) {
   } = useDraggable({
     id: task._id,
   });
+
+  const { isReassignTeam } = useSelector((state: RootState) => state.teams);
+  const { data } = useGetProjectWithTasks(projectId);
+
+  const { team } = data;
+  
 
 
   const handleDeleteTask = (e: any) => {
@@ -160,11 +174,6 @@ export default function TaskItem({ task , isLoad}: Props) {
       <div  className="absolute top-2 right-2">
       {taskEdit?._id !== task._id && (
           <button
-            onClick={(e: any) => {
-              setOpen(!open);
-              e.stopPropagation();
-              
-            }}
             className="
               flex h-7 w-7 items-center justify-center
               rounded-md
@@ -175,94 +184,109 @@ export default function TaskItem({ task , isLoad}: Props) {
             "
           >
             <div className={`${open && 'bg-red-600 text-white'} cursor-pointer rounded-md`}>
-              {open ? (
-                <VscClose size={18}/>
-              ) : (
-                <BiDotsHorizontalRounded size={18} />
-              )}
+             
+              {isReassignTeam && reassignTaskId === task._id ? 
+               <div
+                 onClick={(e: any) => {
+                   e.stopPropagation();
+                   dispatch(removeReassignTaskTeamId())
+                   setOpen(true)
+                 }}
+               >
+                 <IoIosArrowRoundBack size={20}/>
+               </div>
+              :
+                <div 
+                    onClick={(e: any) => {
+                      setOpen(!open);
+                      e.stopPropagation();
+                      dispatch(removeReassignTaskTeamId())
+                    
+                  }}
+                >
+                  {open ? (
+                    <VscClose size={18}/>
+                  ) : (
+                    <BiDotsHorizontalRounded size={18} />
+                  )}
+                </div>
+              }
+
             </div>
           </button>
       )}
 
         {open && (
-          <div
-            onClick={e => e.stopPropagation()}
+          <div 
             className="
-              absolute right-0 mt-1
-              w-36
-              overflow-hidden
-              rounded-lg
-              border border-gray-200
-              bg-white
-              shadow-lg
-              z-50
-            "
+                absolute right-[-0.3rem] mt-1
+                w-36
+                overflow-hidden
+                rounded-lg
+                border border-gray-200
+                bg-white
+                shadow-lg
+                z-50
+              "
           >
-            <button
-              onClick={() => {
-                dispatch(handleEditTaskTitle(task));
-                dispatch(handleDeleteTaskInStore(task._id))
-                setOpen(false);
-              }}
-              className="
-                flex w-full items-center gap-2
-                px-3 py-2
-                text-sm
-                hover:bg-gray-100
-              "
+           {isReassignTeam && reassignTaskId === task._id ? (
+              <div className="p-2">
+                 <h3 className="mb-2">Reassigner à</h3>
+
+                {/* Team reassign form  */}
+                <TeamReassignForm members={team?.members}/>
+              </div>
+           ) : (
+            <div
+              onClick={e => e.stopPropagation()}
             >
-              <FiEdit2 size={14} />
-              Modifier
-            </button>
-
-            <button
-              onClick={handleDeleteTask}
-              className="
-                flex w-full items-center gap-2
-                px-3 py-2
-                text-sm text-red-600
-                hover:bg-red-50
-              "
-            >
-            {isPending ? <>
-              <span  className="inline-block
-                    h-3
-                    w-3
-                    animate-spin
-                    rounded-full
-                    border-2
-                    border-red
-                    border-t-transparent
-                    mr-2"></span> Suppression...
-            </>
-            : 
-              <>
-                <FiTrash2 onClick={(e: any) => e.stopPropagation()} size={14} />
-                Supprimer
-              </>
-            }
-            </button>
-
-            <h2 className="text-sm ml-2">Déplacer ver...</h2>
-
-            {statusBtns.map((btn) => (
+             {project?.ownerId === user?._id && (
               <div>
-                { task.status !== btn.value && (
-                  <button
-                    key={btn.value}
-                    onClick={() => handleUpdateStatus(btn.value)}
-                    value={btn.value}
-                    disabled={loadUpdateTaskStatus}
-                    className="
-                      flex w-full items-center gap-2
-                      px-3 py-2
-                      text-sm text-gray-600
-                      hover:bg-red-50
-                    "
-                  >
-                  {loadUpdateTaskStatus && loadingStatus === btn.value ?
-                  <div className="flex items-center gap-1">
-                      <span  className="inline-block
+                <button
+                  onClick={() => {
+                    dispatch(handleEditTaskTitle(task));
+                    dispatch(handleDeleteTaskInStore(task._id))
+                    setOpen(false);
+                  }}
+                  className="
+                    flex w-full items-center gap-2
+                    px-3 py-2
+                    text-sm
+                    hover:bg-gray-100
+                  "
+                >
+                  <FiEdit2 size={14} />
+                  Modifier
+                </button>
+
+                <button
+                  onClick={() => {
+                    dispatch(setReassignTeamStore())
+                    dispatch(setReassignTaskTeamId(task._id))
+                  }}
+                  className="
+                    flex w-full items-center gap-2
+                    px-3 py-2
+                    text-sm
+                    hover:bg-gray-100
+                  "
+                >
+                  <MdOutlineAssignmentInd size={14}/>
+
+                  Réasigné
+                </button>
+
+                <button
+                  onClick={handleDeleteTask}
+                  className="
+                    flex w-full items-center gap-2
+                    px-3 py-2
+                    text-sm text-red-600
+                    hover:bg-red-50
+                  "
+                >
+                {isPending ? <>
+                  <span  className="inline-block
                         h-3
                         w-3
                         animate-spin
@@ -270,20 +294,61 @@ export default function TaskItem({ task , isLoad}: Props) {
                         border-2
                         border-red
                         border-t-transparent
-                        mr-2"></span> Déplacé...
-                  </div>
-                  : 
-                  
-                    <div className="flex gap-2">
-                      {btn.title} <IoIosArrowForward />
-                    </div>
-                  }
-                  </button>
-                )}
+                        mr-2"></span> Suppression...
+                </>
+                : 
+                  <>
+                    <FiTrash2 onClick={(e: any) => e.stopPropagation()} size={14} />
+                    Supprimer
+                  </>
+                }
+                </button>
               </div>
-            ))}
+             )}
+
+              <h2 className="text-sm ml-2">Déplacer ver...</h2>
+
+              {statusBtns.map((btn) => (
+                <div>
+                  { task.status !== btn.value && (
+                    <button
+                      key={btn.value}
+                      onClick={() => handleUpdateStatus(btn.value)}
+                      value={btn.value}
+                      disabled={loadUpdateTaskStatus}
+                      className="
+                        flex w-full items-center gap-2
+                        px-3 py-2
+                        text-sm text-gray-600
+                        hover:bg-red-50
+                      "
+                    >
+                    {loadUpdateTaskStatus && loadingStatus === btn.value ?
+                    <div className="flex items-center gap-1">
+                        <span  className="inline-block
+                          h-3
+                          w-3
+                          animate-spin
+                          rounded-full
+                          border-2
+                          border-red
+                          border-t-transparent
+                          mr-2"></span> Déplacé...
+                    </div>
+                    : 
+                    
+                      <div className="flex gap-2">
+                        {btn.title} <IoIosArrowForward />
+                      </div>
+                    }
+                    </button>
+                  )}
+                </div>
+              ))}
 
 
+            </div>
+           )}
           </div>
         )}
       </div>
@@ -311,7 +376,10 @@ export default function TaskItem({ task , isLoad}: Props) {
                       opacity-0
                       group-hover:opacity-100
                       transition-opacity
-                      duration-200 flex gap-2">
+                      duration-200 flex gap-2"
+                >
+
+                  {/* Drag Icon     */}
                   <div
                     {...listeners}
                     {...attributes}
@@ -321,22 +389,50 @@ export default function TaskItem({ task , isLoad}: Props) {
                       ${isDragging ? "!cursor-grabbing" : ""}
                     `}
                   >
-                      <RiDragMove2Line size={13} />
+                      <RiDragMove2Line 
+                        size={13} 
+                        title="Déplacer"
+                      />
                   </div>
-                  <div 
-                      onClick={() => {
-                        if (!taskEdit || taskEdit._id !== task._id) {
-                          dispatch(handleDeleteAllTask(task._id));
-                        }
-                      }}
-                      className="cursor-pointer hover:text-red-500 transition"
-                  >
-                     {deleteTaskIds.includes(task._id) ? (
-                        <IoMdClose  size={13} className="text-white"/>
-                     ) : (
-                      <FaRegTrashAlt size={13} />
-                     )}
-                  </div>
+                  
+                  {project?.ownerId === user?._id && (
+                    <div className="flex gap-2">
+                        {/* RemoveIcon  */}
+                        <div 
+                            onClick={() => {
+                              if (!taskEdit || taskEdit._id !== task._id) {
+                                dispatch(handleDeleteAllTask(task._id));
+                              }
+                            }}
+                            className="cursor-pointer hover:text-red-500 transition"
+                        >
+                          {deleteTaskIds.includes(task._id) ? (
+                              <IoMdClose title="Fermer"  size={13} className="text-white"/>
+                          ) : (
+                            <FaRegTrashAlt 
+                              size={13} 
+                              title="Selectionner"
+                            />
+                          )}
+                        </div>
+
+                        {/* Assignerd icon  */}
+                        <div>
+                            <MdOutlineAssignmentInd 
+                              size={14}
+                              title="reassigner"
+                            />
+                        </div>
+                    </div>
+                  )}
+
+                </div>
+
+                <div>
+                  <Badge>
+                     {/* {JSON.stringify(task)} */}
+                     {task.teamId == null ? 'Non assigner' : task?.teamId?.name}
+                  </Badge>
                 </div>
 
                 <h4

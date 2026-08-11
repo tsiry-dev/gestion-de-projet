@@ -60,7 +60,7 @@ export default function EditTask()  {
           label=""
           error={errors.title?.message}
         >
-          <Textarea disabled={isPendingUpdateTask} rows={6} {...register("title")}>
+          <Textarea disabled={isPendingUpdateTask} rows={3} {...register("title")}>
           </Textarea >
         </FormItem>
 

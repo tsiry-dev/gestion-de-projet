@@ -7,7 +7,8 @@ type InitialStateType = {
    isCreateTask: boolean;
    deleteTaskIds: string[];
    isMoveTask: any | null;
-   taskEdit: TaskType | null
+   taskEdit: TaskType | null,
+   reassignTaskId: string | null; 
 }
 
 const initialState: InitialStateType = {
@@ -16,6 +17,7 @@ const initialState: InitialStateType = {
    deleteTaskIds: [],
    isMoveTask: null,
    taskEdit: null,
+   reassignTaskId: null
 }
 
 export const taskSlice = createSlice({
@@ -48,12 +50,16 @@ export const taskSlice = createSlice({
     handleEditTaskTitle:  (state, action) => {
        state.taskEdit = action.payload;
     },
-    handleResetEditTask: (state) => {state.taskEdit = null} 
+    handleResetEditTask: (state) => {state.taskEdit = null} ,
+    setReassignTaskTeamId: (state, action) => {state.reassignTaskId = action.payload},
+    removeReassignTaskTeamId: (state) => {state.reassignTaskId = null}
   },
 })
 
 // Action creators
 export const { 
+    setReassignTaskTeamId,
+    removeReassignTaskTeamId,
    handleSetTaskDetail,
    handleCreateTask,
    handleCloseCreateTask,

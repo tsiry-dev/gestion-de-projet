@@ -1,10 +1,11 @@
 import ProjectModel from "@/models/project.model";
+import TaskModel from "@/models/task.model";
 import TeamModel from "@/models/team.model";
 import UserModel from "@/models/user.model";
 import { ConflictError } from "@/shared/errors/ConflictError";
 import { NotFoundError } from "@/shared/errors/NotFoundError";
-import { AddTeamDTO } from "@/shared/validators/team.schema";
-import mongoose from "mongoose";
+import { AddTeamDTO, ReassignTeamDTO } from "@/shared/validators/team.schema";
+import mongoose, { Types } from "mongoose";
 
 export class TeamService {
   public async search(query?: string) {
@@ -96,4 +97,66 @@ export class TeamService {
 
     return updatedTeam;
   }
+
+  public async remove(id: string) {
+    
+    if (!id) {
+        throw new NotFoundError("Membre non trouvé!!");
+    }
+
+    const team = await TeamModel.findOneAndUpdate(
+        {
+            "members._id": id
+        },
+        {
+            $pull: {
+                members: {
+                    _id: id
+                }
+            }
+        },
+        {
+            new: true
+        }
+    );
+
+
+    if (!team) {
+        throw new NotFoundError("Membre non trouvé!!");
+    }
+
+    return team;
+  }
+
+  public async reassign(data: ReassignTeamDTO) {
+    const { taskId, teamId } = data;
+
+    const existingTask = await TaskModel.findById(taskId);
+    if (!existingTask) {
+        throw new NotFoundError(
+            "Tâche non trouvée!"
+        );
+    }
+
+    const existingUser = await UserModel.findById(teamId);
+    if (!existingUser) {
+        throw new NotFoundError(
+            "Equipe non trouvée!"
+        );
+    }
+
+    if(existingTask.teamId) {
+        throw new ConflictError(
+            "Le tache est déja réassigner!!"
+        );
+    }
+
+    existingTask.teamId = new Types.ObjectId(teamId);
+
+    await existingTask.save();
+
+    return existingTask;
+
+  }
+
 }

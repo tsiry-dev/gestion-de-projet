@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { RxDashboard } from "react-icons/rx";
-import { LiaClipboardListSolid } from "react-icons/lia";
 import { GoProject } from "react-icons/go";
 import { FaRegUser } from "react-icons/fa";
 import SidebarLink from "./ui/sidebar-link";
@@ -11,9 +10,7 @@ import useGetAllProject from "@/modules/projects/hooks/useGetAllProjects";
 import { NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/app/store/store";
-import { Dialog } from "./dialog";
-import { onCloseCreateProject, onOpeCreateProject, onOpenProjectDetail } from "@/app/store/features/projectSlice";
-import NewProject from "@/modules/projects/components/new-project";
+import { onOpeCreateProject, onOpenProjectDetail } from "@/app/store/features/projectSlice";
 import { VscLayoutSidebarLeftOff } from "react-icons/vsc";
 import { HiOutlineTrash } from "react-icons/hi2";
 
@@ -26,6 +23,7 @@ export default function AdminSidebar() {
 
    const {data, isPending} = useGetAllProject();
    const { isCreateProject } = useSelector((state: RootState) => state.projects);
+   const { user } = useSelector((state: RootState) => state.session);
    const dispatch = useDispatch();
 
   return (
@@ -115,15 +113,10 @@ export default function AdminSidebar() {
                 Projects
               </SidebarLink>
 
-              <SidebarLink to={"/admin/tasks"}>
+              {/* <SidebarLink to={"/admin/tasks"}>
                 <HiOutlineTrash size={12}/> &nbsp;
                 Corbaille
-              </SidebarLink>
-
-              <SidebarLink to={"/admin/teams"}>
-                <FaRegUser size={12}/> &nbsp;
-                Team
-              </SidebarLink>
+              </SidebarLink> */}
             </div>
           </div>
 
@@ -219,11 +212,11 @@ export default function AdminSidebar() {
 
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-900">
-                  John Doe
+                  { user?.name }
                 </p>
 
                 <p className="text-xs text-gray-500">
-                  john@example.com
+                  { user?.email }
                 </p>
               </div>
 

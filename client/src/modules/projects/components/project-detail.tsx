@@ -11,7 +11,7 @@ import ServerError from "@/shared/components/server-error";
 import TaskCreate from "@/modules/tasks/components/task-create";
 import { handleCreateMoveTask, handleResetDeleteTaskIds, handleResetMoveTask, handleToggleCreateTask } from "@/app/store/features/taskSlice";
 import { MdClose } from "react-icons/md";
-import { VscEditCompact } from "react-icons/vsc";
+import { VscEditCompact, VscLayoutSidebarLeftOff } from "react-icons/vsc";
 import { edit, resetEdit } from "@/app/store/features/projectSlice";
 import EditProject from "./edit-project";
 import Status from "@/shared/components/ui/status";
@@ -22,7 +22,7 @@ import TaskItemContainer from "@/modules/tasks/components/task-item-container";
 import { taskCount } from "@/modules/tasks/utils";
 import { TfiClose } from "react-icons/tfi";
 import { GoTrash } from "react-icons/go";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDeleteAllTask } from '../../tasks/hooks/useDeleteAllTask';
 import { notify } from "@/core/feedback/notify";
 import { useConfirmAction } from "@/shared/hooks/useConfirmAction";
@@ -38,6 +38,8 @@ import ListTeam from "../../teams/components/list-team";
 import ProjectDetailError from "./project-detail-error";
 import ReactECharts from "echarts-for-react";
 import useChartPie from "../hooks/useChartPie";
+import { VscLayoutSidebarRightOff } from "react-icons/vsc";
+
 
 
 
@@ -88,11 +90,26 @@ export default function ProjectDetail() {
     deleteTaskIds: ids,
     isMoveTask
   } = useSelector((state: RootState) => state.tasks);
+  const { user } = useSelector((state: RootState) => state.session);
    const { mutate: deleteAllTask , isPending: loadRemoveTasks} = useDeleteAllTask(ids, projectId);
    const {confirm} = useConfirmAction();
    const { mutate: updateTaskStatusQuery } = useUpdateTaskStatus(projectId);
    const { active } = useDndContext();
    const { chartOption } = useChartPie(data?.tasks ?? []);
+   const [isOpenSidebar, setIsOpenSidebar] = useState<boolean>(true);
+   const [isOpenTeamBar, setIsOpenTeamBar] = useState<boolean>(true);
+   const isOwner = String(project?.ownerId) === String(user?._id);
+
+   const visibleTasks = tasks?.filter((task: any) => {
+    if (isOwner) {
+      return String(task.projectId) === String(projectId);
+    }
+
+    return (
+      String(task.projectId) === String(projectId) &&
+      String(task.teamId) === String(user?._id)
+    );
+  });
 
    console.log(data);
 
@@ -189,6 +206,7 @@ export default function ProjectDetail() {
 
       <div className=" flex mt-3 min-h-[60vh]">
        {/* Sidebar  */}
+       {isOpenSidebar && (
         <aside className="w-[20%]">
           <div className="group flex justify-between items-start px-2">
             <div className="flex-1">
@@ -196,7 +214,9 @@ export default function ProjectDetail() {
                 <div className="project-title">
                     <Status type={project?.status} />
                     
-                  <h2 className="font-bold text-2xl">{project?.title}</h2>
+                  <div>
+                    <h2 className="font-bold text-2xl">{project?.title}</h2>
+                  </div>
 
                   <Paragraphe>
                     {project?.description}
@@ -206,32 +226,34 @@ export default function ProjectDetail() {
                 <EditProject />
               )}
             </div>
-
-            <div className="ml-2">
-              {!editProject ? (
-                <Button
-                  title="Modifier"
-                  onClick={() => dispatch(edit(project))}
-                  className="
-                    opacity-0
-                    invisible
-                    transition-all
-                    duration-200
-                    group-hover:opacity-100
-                    group-hover:visible
-                  "
-                >
-                  <VscEditCompact size={15} />
-                </Button>
-              ) : (
-                <Button
-                  $variant="danger"
-                  onClick={() => dispatch(resetEdit())}
-                >
-                  <MdClose size={15} />
-                </Button>
-              )}
-            </div>
+         
+            {project?.ownerId == user?._id && (
+              <div className="ml-2 flex relative">
+                {!editProject ? (
+                  <Button
+                    title="Modifier"
+                    onClick={() => dispatch(edit(project))}
+                    className="
+                      opacity-0
+                      invisible
+                      transition-all
+                      duration-200
+                      group-hover:opacity-100
+                      group-hover:visible
+                    "
+                  >
+                    <VscEditCompact size={15} />
+                  </Button>
+                ) : (
+                  <Button
+                    $variant="danger"
+                    onClick={() => dispatch(resetEdit())}
+                  >
+                    <MdClose size={15} />
+                  </Button>
+                )}
+              </div>
+            )}
           </div> 
 
         {!editProject && (
@@ -254,14 +276,29 @@ export default function ProjectDetail() {
           </div>
         )}
         </aside>
+       )}
 
       {/* main content  */}
-        <main className="flex gap-2 border-l-1 border-gray-300 flex-1">
+        <main className={`flex gap-2 border-l-1 ${!isOpenSidebar ? 'ml-3' : 'ml-0'} border-gray-300 flex-1`}>
           <div className="ml-3 flex-5">
+            <div className={`flex ${!isOpenSidebar ? 'justify-end': 'justify-between'}`}>
+              <VscLayoutSidebarLeftOff 
+                title={`${!isOpenSidebar ? "Fermer le menu bar" : "Ouvrir le menu bar"}`}
+                className={`${!isOpenSidebar ? 'absolute left-1': 'block'} cursor-pointer`}
+                onClick={()=> setIsOpenSidebar(old => !old)} 
+                size={15} 
+              />
+
+              <VscLayoutSidebarRightOff
+                onClick={()=> setIsOpenTeamBar(old => !old)}
+                className={`cursor-pointer`} 
+                size={15} 
+              />
+            </div>
 
             <div className="flex justify-between">
               <SubTitle>
-                Tache{tasks?.length > 0 && "s"} ({tasks?.length ?? 0})
+                Tache{visibleTasks?.length > 0 && "s"} ({visibleTasks?.length ?? 0})
               </SubTitle>
               
               <div className="flex gap-2">
@@ -299,23 +336,25 @@ export default function ProjectDetail() {
                 </div>
                 }
 
-                <Button 
-                    $variant={isCreateTask ? 'danger': 'primary'}  
-                    onClick={() => dispatch(handleToggleCreateTask())}
-                >
-                {isCreateTask ? 
-                  <div className="flex">
-                    Fermer &nbsp;
-                    <MdClose size={15}/>
-                  </div>
-                
-                  :
-                  <div className="flex" title="Nouveau tache">
-                    Nouveau &nbsp;
-                    <HiMiniPlus size={15}/>
-                  </div>
-                }
-                </Button>
+               {project?.ownerId == user?._id && (
+                  <Button 
+                      $variant={isCreateTask ? 'danger': 'primary'}  
+                      onClick={() => dispatch(handleToggleCreateTask())}
+                  >
+                  {isCreateTask ? 
+                    <div className="flex">
+                      Fermer &nbsp;
+                      <MdClose size={15}/>
+                    </div>
+                  
+                    :
+                    <div className="flex" title="Nouveau tache">
+                      Nouveau &nbsp;
+                      <HiMiniPlus size={15}/>
+                    </div>
+                  }
+                  </Button>
+               )}
               </div>
             </div>
 
@@ -346,20 +385,37 @@ export default function ProjectDetail() {
                             {isMoveTask?.load && isMoveTask?.status === column.status && (
                               <TaskItemSkeleton />
                             )}
-                            {tasks
-                              ?.filter((t: any) => t.status === column.status)
-                              .sort(
-                                (a: any, b: any) =>
-                                  new Date(b.updatedAt).getTime() -
-                                  new Date(a.updatedAt).getTime()
-                              )
-                              .map((task: any) => (
-                                <TaskItem
-                                  key={task._id}
-                                  isLoad={loadRemoveTasks}
-                                  task={task}
-                                />
-                              ))}
+                          {tasks
+                            ?.filter((task: any) => {
+                              // Vérifie d'abord que la tâche appartient au projet
+                              if (String(task.projectId) !== String(projectId)) {
+                                return false;
+                              }
+
+                              // Le propriétaire voit toutes les tâches du projet
+                              if (isOwner) {
+                                return task.status === column.status;
+                              }
+
+                              // Les membres voient seulement leurs tâches
+                              return (
+                                  task.status === column.status &&
+                                  String(task.teamId?._id) === String(user?._id)
+                              );
+                            })
+                            .sort(
+                              (a: any, b: any) =>
+                                new Date(b.updatedAt).getTime() -
+                                new Date(a.updatedAt).getTime()
+                            )
+                            .map((task: any) => (
+                              <TaskItem
+                                key={task._id}
+                                isLoad={loadRemoveTasks}
+                                task={task}
+                                project={project}
+                              />
+                            ))}
                           </TaskContentWrapper>
                         </TaskItemContainer>
                     ))}
@@ -373,7 +429,12 @@ export default function ProjectDetail() {
           </div>
 
             {/* Liste des teams  */}
-            <ListTeam team={data.team} />
+            {isOpenTeamBar && (
+              <ListTeam 
+                team={data.team}
+                project={project} 
+              />
+            )}
         </main>
       </div>
   </div>

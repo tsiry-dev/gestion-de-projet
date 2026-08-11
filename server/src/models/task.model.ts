@@ -13,6 +13,7 @@ export type TaskStatusType = typeof TaskStatus[keyof typeof TaskStatus];
 
 export interface Task {
     projectId: Types.ObjectId,
+    teamId: Types.ObjectId | null,
     title: string,
     status: TaskStatusType,
 }
@@ -25,6 +26,11 @@ const taskSchema = new Schema<Task>({
         ref: "Project",
         required: true,
         index: true
+    },
+    teamId: {
+      type: Types.ObjectId,
+      ref: "User",
+      default: null,
     },
     title: {
         type: String,

@@ -35,11 +35,13 @@ export const ENDPOINTS = {
     DELETE: (id: string) => `/tasks/remove/${id}`,
     DELETEALL: "/tasks/remove/all",
     UPDATESTATUS: "/tasks/update/status",
-    UPDATE : "/tasks/update"
+    UPDATE : "/tasks/update",
+    REASSIGN: "/teams/reassign"
   },
   TEAMS: {
     SEARCH: (query: string) => `/teams/search?query=${encodeURIComponent(query)}`,
-    ADD: `/teams/add`
+    ADD: `/teams/add`,
+    REMOVE: (id: string) => `/teams/remove/${id}`
   }
 
 } as const;

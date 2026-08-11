@@ -6,6 +6,8 @@ import { store } from "@/app/store/store";
 
 
 
+
+
 /**
  * 🌐 AXIOS INSTANCE
  */
@@ -18,6 +20,8 @@ const privateApi: AxiosInstance = axios.create({
 });
 
 privateApi.interceptors.request.use((config) => {
+
+  
   
   const token = store.getState().session.token;
 

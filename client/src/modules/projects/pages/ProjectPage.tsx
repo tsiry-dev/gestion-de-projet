@@ -63,6 +63,8 @@ export default function ProjectPage() {
   const total = allProjects.length;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
+  console.log("All project", allProjects);
+
   // Découpage côté client de la page courante
   const paginatedProjects = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
