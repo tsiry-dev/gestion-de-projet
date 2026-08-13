@@ -10,6 +10,7 @@ import taskRoutes from "@/routes/task.route";
 import authRoutes from "./routes/auth.route";
 import { authenticate } from "./middlewares/authenticate.middleware";
 import teamRoutes from "./routes/team.route";
+import commentRoutes from "./routes/comment.route";
 
 const app = express();
 const BASE_API = config.BASE_API || "/api/v1";
@@ -44,6 +45,7 @@ app.use(`${BASE_API}/auth`, authRoutes);
 app.use(`${BASE_API}/projects`,authenticate, projectRoutes);
 app.use(`${BASE_API}/tasks`, authenticate, taskRoutes);
 app.use(`${BASE_API}/teams`, authenticate, teamRoutes);
+app.use(`${BASE_API}/comments`, authenticate, commentRoutes);
 
 app.use(errorHandler);
 

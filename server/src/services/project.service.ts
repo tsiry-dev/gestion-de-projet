@@ -196,18 +196,49 @@ export class ProjectService {
         };
     }
 
-    public async remove(id: string):Promise<void> {
+    public async remove(id: string): Promise<void> {
+        const session = await mongoose.startSession();
 
-        const existingProject = await ProjectModel.findById(id);
+        try {
+            await session.withTransaction(async () => {
+                const existingProject = await ProjectModel
+                    .findById(id)
+                    .session(session);
 
-        if(!existingProject) {
-            throw new NotFoundError(
-            "Ce projet n'existe pas"
-            );
+                if (!existingProject) {
+                    throw new NotFoundError(
+                        "Ce projet n'existe pas"
+                    );
+                }
+
+                await TaskModel.deleteMany(
+                    {
+                        projectId: existingProject._id,
+                    },
+                    {
+                        session,
+                    }
+                );
+
+                await TeamModel.deleteOne(
+                    {
+                        projectId: existingProject._id,
+                    },
+                    {
+                        session,
+                    }
+                );
+
+                await ProjectModel.findByIdAndDelete(
+                    existingProject._id,
+                    {
+                        session,
+                    }
+                );
+            });
+        } finally {
+            await session.endSession();
         }
-
-        await ProjectModel.findByIdAndDelete(id);
-
     }
 
     public async removeAll(ids: string[]): Promise<void> {  

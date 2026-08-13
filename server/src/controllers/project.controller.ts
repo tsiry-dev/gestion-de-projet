@@ -10,7 +10,6 @@ export class ProjectController {
 
     constructor() {
         this.projectService = new ProjectService();
-        console.log(this.projectService);
     }
 
     public create: RequestHandler = asyncHandler(
