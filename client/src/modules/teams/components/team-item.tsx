@@ -26,7 +26,6 @@ export default function TeamItem({ member, project }: TeamItemProps) {
     const { confirm } = useConfirmAction();
     const dispatch = useDispatch();
 
-    console.log(project);
 
     const isOwner = project?.ownerId === user?._id;
 

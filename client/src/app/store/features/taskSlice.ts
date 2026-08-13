@@ -8,7 +8,8 @@ type InitialStateType = {
    deleteTaskIds: string[];
    isMoveTask: any | null;
    taskEdit: TaskType | null,
-   reassignTaskId: string | null; 
+   reassignTaskId: string | null;
+   taskView: TaskType | null;  
 }
 
 const initialState: InitialStateType = {
@@ -17,7 +18,8 @@ const initialState: InitialStateType = {
    deleteTaskIds: [],
    isMoveTask: null,
    taskEdit: null,
-   reassignTaskId: null
+   reassignTaskId: null,
+   taskView: null
 }
 
 export const taskSlice = createSlice({
@@ -52,7 +54,9 @@ export const taskSlice = createSlice({
     },
     handleResetEditTask: (state) => {state.taskEdit = null} ,
     setReassignTaskTeamId: (state, action) => {state.reassignTaskId = action.payload},
-    removeReassignTaskTeamId: (state) => {state.reassignTaskId = null}
+    removeReassignTaskTeamId: (state) => {state.reassignTaskId = null},
+    setTaskViewStore: (state, action) => { state.taskView = action.payload },
+    removeTaskViewStore: (state) => { state.taskView = null }
   },
 })
 
@@ -70,7 +74,9 @@ export const {
    handleCreateMoveTask,
    handleResetMoveTask,
    handleEditTaskTitle,
-   handleResetEditTask
+   handleResetEditTask,
+   setTaskViewStore,
+   removeTaskViewStore
 } = taskSlice.actions
 
 // Exporter le reducer par défaut

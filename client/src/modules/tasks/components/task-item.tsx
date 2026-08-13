@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { filterStatus, filterStatusBadge } from "@/modules/projects/utils";
 import Badge from "@/shared/components/ui/badge";
 import CardMini from "@/shared/components/ui/card-mini";
 import { truncate } from "@/shared/utils/string.utils";
@@ -19,11 +18,13 @@ import {
   handleResetEditTask, 
   handleResetMoveTask, 
   removeReassignTaskTeamId, 
-  setReassignTaskTeamId
+  removeTaskViewStore, 
+  setReassignTaskTeamId,
+  setTaskViewStore
 } from "@/app/store/features/taskSlice";
 import { useConfirmAction } from "@/shared/hooks/useConfirmAction";
 import { useUpdateTaskStatus } from "../hooks/useUpdateTaskStatus";
-import { TaskStatus, type TaskStatusType } from "../type";
+import { TaskStatus, type Comment, type TaskStatusType } from "../type";
 import EditTask from "./edit-task";
 import { useDraggable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
@@ -34,9 +35,10 @@ import { MdOutlineAssignmentInd } from "react-icons/md";
 import { setReassignTeamStore } from "@/app/store/features/teamSlice";
 import useGetProjectWithTasks from "@/modules/projects/hooks/useGetProjectWithTask";
 import { IoIosArrowRoundBack } from "react-icons/io";
-import Button from "@/shared/components/ui/button";
 import TeamReassignForm from "@/modules/teams/components/team-reassign-form";
-
+import { FaRegCommentDots } from "react-icons/fa";
+import { IoEyeOutline , IoEyeOffOutline} from "react-icons/io5";
+import { LuEyeClosed } from "react-icons/lu";
 
 
 
@@ -70,14 +72,17 @@ const statusBtns = [
 ];
 
 export default function TaskItem({ task , isLoad, project}: Props) {
+
   const [showFullTitle, setShowFullTitle] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
   const { projectDetailId: projectId } = useSelector((state: RootState) => state.projects);
+
   const { user } = useSelector((state: RootState) => state.session);
-  const { deleteTaskIds, taskEdit, isMoveTask,reassignTaskId } = useSelector((state: RootState) => state.tasks);
+  const { deleteTaskIds, taskEdit, isMoveTask,reassignTaskId, taskView } = useSelector((state: RootState) => state.tasks);
   const { mutate: deleteTask, isPending, error } = useDeleteTask(task._id, projectId);
   const dispatch = useDispatch();
   const {confirm} = useConfirmAction();
+
   const {
     mutate: updateTaskStatusQuery, 
     isPending: loadUpdateTaskStatus
@@ -129,10 +134,13 @@ export default function TaskItem({ task , isLoad, project}: Props) {
         taskId: task._id,
       }))
       updateTaskStatusQuery(data, {
-         onSuccess: () => {
+         onSuccess: (response) => {
             notify.success(`Le tache à éte déplacé`);
             setLoadingStatus(null);
             dispatch(handleResetMoveTask());
+            console.log("Deplace");
+            
+
          },
          onError: (error) => {
             notify.error(error.message);
@@ -372,12 +380,7 @@ export default function TaskItem({ task , isLoad, project}: Props) {
           :
             (
               <div>
-                <div className="
-                      opacity-0
-                      group-hover:opacity-100
-                      transition-opacity
-                      duration-200 flex gap-2"
-                >
+                <div className="flex gap-2">
 
                   {/* Drag Icon     */}
                   <div
@@ -393,6 +396,17 @@ export default function TaskItem({ task , isLoad, project}: Props) {
                         size={13} 
                         title="Déplacer"
                       />
+                  </div>
+
+                  {/* Comment icon  */}
+                  <div className="relative"  onClick={() => dispatch(setTaskViewStore(task))}>
+                     <span className="
+                               absolute bg-red-500 text-white bottom-3 left-2
+                               text-[8px] h-4 w-4 rounded-full flex items-center justify-center
+                      ">
+                       {task?.comments.filter((c: Comment) => c.isView === false).length ?? 0}
+                      </span>
+                    <FaRegCommentDots size={13}/>
                   </div>
                   
                   {project?.ownerId === user?._id && (
@@ -415,16 +429,25 @@ export default function TaskItem({ task , isLoad, project}: Props) {
                             />
                           )}
                         </div>
-
-                        {/* Assignerd icon  */}
-                        <div>
-                            <MdOutlineAssignmentInd 
-                              size={14}
-                              title="reassigner"
-                            />
-                        </div>
                     </div>
                   )}
+
+                  {/* Assignerd icon  */}
+                  <div>
+                    {taskView?._id === task?._id ? (
+                      <LuEyeClosed
+                        onClick={() => dispatch(removeTaskViewStore())}
+                        size={15}
+                        className="cursor-pointer"
+                      />
+                    ) : (
+                      <IoEyeOutline
+                        onClick={() => dispatch(setTaskViewStore(task))}
+                        size={15}
+                        className="cursor-pointer"
+                      />
+                    )}
+                  </div>
 
                 </div>
 
@@ -453,6 +476,8 @@ export default function TaskItem({ task , isLoad, project}: Props) {
               </div>
             )
           }
+
+
 
       </div>
 

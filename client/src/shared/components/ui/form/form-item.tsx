@@ -6,7 +6,7 @@ type Props = {
     error?: string | null;
 }
 
-export function FormItem({ label= 'label', children, error=null}: Props) {
+export function FormItem({ label= '', children, error=null}: Props) {
     return <div className="mb-3 text-gray-500">
        {label && (
         <label>

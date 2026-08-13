@@ -42,6 +42,9 @@ export const ENDPOINTS = {
     SEARCH: (query: string) => `/teams/search?query=${encodeURIComponent(query)}`,
     ADD: `/teams/add`,
     REMOVE: (id: string) => `/teams/remove/${id}`
+  },
+  COMMENT: {
+    CREATE: `/comments/create`
   }
 
 } as const;

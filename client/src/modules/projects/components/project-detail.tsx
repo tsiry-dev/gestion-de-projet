@@ -9,7 +9,7 @@ import { HiMiniPlus } from "react-icons/hi2";
 import ProjectDetailSkeleton from "./project-detail-skeleton";
 import ServerError from "@/shared/components/server-error";
 import TaskCreate from "@/modules/tasks/components/task-create";
-import { handleCreateMoveTask, handleResetDeleteTaskIds, handleResetMoveTask, handleToggleCreateTask } from "@/app/store/features/taskSlice";
+import { handleCreateMoveTask, handleResetDeleteTaskIds, handleResetMoveTask, handleToggleCreateTask, setTaskViewStore } from "@/app/store/features/taskSlice";
 import { MdClose } from "react-icons/md";
 import { VscEditCompact, VscLayoutSidebarLeftOff } from "react-icons/vsc";
 import { edit, resetEdit } from "@/app/store/features/projectSlice";
@@ -39,6 +39,7 @@ import ProjectDetailError from "./project-detail-error";
 import ReactECharts from "echarts-for-react";
 import useChartPie from "../hooks/useChartPie";
 import { VscLayoutSidebarRightOff } from "react-icons/vsc";
+import TaskDetail from "@/modules/tasks/components/task-detail";
 
 
 
@@ -80,25 +81,31 @@ const COLUMNS: ColumType[] = [
 
 export default function ProjectDetail() {
    
-   const { projectDetailId: projectId, editProject } = useSelector((state: RootState) => state.projects);
-   const { data , isPending, error , refetch} = useGetProjectWithTasks(projectId);
-   const project = data?.project;
-   const tasks = data?.tasks;
-   const dispatch = useDispatch();
-   const { 
+  const [isOpenSidebar, setIsOpenSidebar] = useState<boolean>(true);
+  const [isOpenTeamBar, setIsOpenTeamBar] = useState<boolean>(true);
+
+  const { projectDetailId: projectId, editProject } = useSelector((state: RootState) => state.projects);
+  const { 
     isCreateTask , 
     deleteTaskIds: ids,
     isMoveTask
   } = useSelector((state: RootState) => state.tasks);
   const { user } = useSelector((state: RootState) => state.session);
-   const { mutate: deleteAllTask , isPending: loadRemoveTasks} = useDeleteAllTask(ids, projectId);
-   const {confirm} = useConfirmAction();
-   const { mutate: updateTaskStatusQuery } = useUpdateTaskStatus(projectId);
-   const { active } = useDndContext();
-   const { chartOption } = useChartPie(data?.tasks ?? []);
-   const [isOpenSidebar, setIsOpenSidebar] = useState<boolean>(true);
-   const [isOpenTeamBar, setIsOpenTeamBar] = useState<boolean>(true);
-   const isOwner = String(project?.ownerId) === String(user?._id);
+  const { taskView } = useSelector((state: RootState) => state.tasks);
+  const dispatch = useDispatch();
+
+  const { data , isPending, error , refetch} = useGetProjectWithTasks(projectId);
+
+  const project = data?.project;
+  const isOwner = String(project?.ownerId) === String(user?._id);
+  const tasks = data?.tasks;
+
+
+  const { mutate: deleteAllTask , isPending: loadRemoveTasks} = useDeleteAllTask(ids, projectId);
+  const { mutate: updateTaskStatusQuery } = useUpdateTaskStatus(projectId);
+  const { chartOption } = useChartPie(data?.tasks ?? [], isOwner, user?._id as string);
+
+  const {confirm} = useConfirmAction();
 
    const visibleTasks = tasks?.filter((task: any) => {
     if (isOwner) {
@@ -111,7 +118,14 @@ export default function ProjectDetail() {
     );
   });
 
-   console.log(data);
+  const taskLength = () => {
+     if(isOwner) {
+      return tasks?.length ?? 0;
+     }
+     const taskAssigned = tasks?.filter((t: any) => t.teamId?._id === user?._id);
+     return taskAssigned?.length ?? 0;
+  }
+
 
    useEffect(() => {
      dispatch(handleResetDeleteTaskIds())
@@ -175,9 +189,16 @@ export default function ProjectDetail() {
           status: newStatus,
         },
         {
-          onSuccess: () => {
+          onSuccess: (response) => {
+            const { data } = response?.data;
             notify.success(`Le tache "${truncate(currentTask.title, 25)}" à éte déplacé`);
             dispatch(handleResetMoveTask());
+            if(currentTask._id === taskView?._id) {
+              dispatch(setTaskViewStore({
+                ...taskView,
+                status: data.status
+              }))
+            }
           },
           onError: (error) => {
             notify.error(error.message);
@@ -298,7 +319,7 @@ export default function ProjectDetail() {
 
             <div className="flex justify-between">
               <SubTitle>
-                Tache{visibleTasks?.length > 0 && "s"} ({visibleTasks?.length ?? 0})
+                Tache{  taskLength() > 0 && "s"} ({  taskLength() ?? 0})
               </SubTitle>
               
               <div className="flex gap-2">
@@ -430,10 +451,16 @@ export default function ProjectDetail() {
 
             {/* Liste des teams  */}
             {isOpenTeamBar && (
-              <ListTeam 
-                team={data.team}
-                project={project} 
-              />
+              <div className="w-[200px] shrink-0 px-2">
+               {taskView ? 
+                <TaskDetail project={project} />
+               :(
+                <ListTeam 
+                  team={data.team}
+                  project={project} 
+                />
+               )}
+              </div>
             )}
         </main>
       </div>

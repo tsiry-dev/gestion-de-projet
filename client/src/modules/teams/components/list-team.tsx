@@ -93,7 +93,7 @@ export default function ListTeam({ team , project}: Props) {
 
 
   return (
-    <div className="w-[200px] shrink-0 border-l border-gray-300 px-2">
+    <div className="border-l border-gray-300">
       <div className="flex items-center justify-between">
         <SubTitle>
           Equipes ({members.filter((m: any) => m.role !== RoleTeam.OWNER).length})

@@ -9,10 +9,12 @@ function useReassignTaskOnTeam (projectId: string) {
        mutationFn: reassignTaskOnTeamServive,
        
 
-       onSuccess: () => {
+       onSuccess: (newData) => {
+         const { team } = newData;
+
          queryClient.invalidateQueries({
             queryKey: ['project-with-tasks', projectId],
-         })
+         });
        }
     });
     

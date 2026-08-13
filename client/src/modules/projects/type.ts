@@ -10,6 +10,7 @@ export type StatusType =
 
   export type Project = {
     _id: string;
+    ownerId: string;
     title: string;
     description: string;
     status: StatusType;

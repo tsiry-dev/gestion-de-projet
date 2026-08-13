@@ -16,17 +16,17 @@ const useCreateTask = (projectId: string | null) => {
             queryClient.setQueryData(
             ["project-with-tasks", projectId],
             (old: any) => {
-            if (!old) return old;
+                if (!old) return old;
 
-            return {
-                ...old,
-                tasks: [
-                ...old.tasks,
-                newTask,
-                ],
-            };
-            }
-        );
+                return {
+                    ...old,
+                    tasks: [
+                    ...old.tasks,
+                    newTask,
+                    ],
+                };
+                }
+            );
 
             queryClient.refetchQueries({
                 queryKey: ["project-with-tasks"],

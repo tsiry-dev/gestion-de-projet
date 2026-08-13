@@ -9,8 +9,8 @@ export const useUpdateTaskStatus = (projectId: string | null) => {
   return useMutation({
     mutationFn: updateTaskStatusService,
 
-    onSuccess: (_, variables: UpdateTaskStatusDTO) => {
-
+    onSuccess: (response, variables: UpdateTaskStatusDTO) => {
+      // console.log(response)
       queryClient.setQueryData(
         ['project-with-tasks', projectId],
         (old: any) => {
@@ -36,7 +36,7 @@ export const useUpdateTaskStatus = (projectId: string | null) => {
       queryClient.invalidateQueries({
         queryKey: ["projects"],
       });
-
+      
     },
   });
 };

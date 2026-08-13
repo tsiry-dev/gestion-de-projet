@@ -1,26 +1,39 @@
 import { TaskStatus } from "@/modules/tasks/type";
 
-const useChartPie = (tasks: any[] = []) => {
+const useChartPie = (tasks: any[] = [], isOwner: boolean, assignedId: string) => {
+  
 
-  const todo = tasks.filter(
-    (task) => task.status === TaskStatus.TODO
-  ).length;
+    const todo = tasks.filter(
+      (task) => isOwner ? 
+          task.status === TaskStatus.TODO : 
+          task.status === TaskStatus.TODO && task.teamId?._id === assignedId
+    ).length;
 
-  const inProgress = tasks.filter(
-    (task) => task.status === TaskStatus.IN_PROGRESS
-  ).length;
+    const inProgress = tasks.filter(
+      (task) => isOwner ? 
+          task.status === TaskStatus.IN_PROGRESS : 
+          task.status === TaskStatus.IN_PROGRESS && task.teamId?._id === assignedId
+    ).length;
 
-  const done = tasks.filter(
-    (task) => task.status === TaskStatus.DONE
-  ).length;
+    const done = tasks.filter(
+      (task) => isOwner ? 
+          task.status === TaskStatus.DONE : 
+          task.status === TaskStatus.DONE && task.teamId?._id === assignedId
+    ).length;
 
-  const inReview = tasks.filter(
-    (task) => task.status === TaskStatus.IN_REVIEW
-  ).length;
+    const inReview = tasks.filter(
+      (task) => isOwner ? 
+          task.status === TaskStatus.IN_REVIEW : 
+          task.status === TaskStatus.IN_REVIEW && task.teamId?._id === assignedId
+    ).length;
 
-  const cancelled = tasks.filter(
-    (task) => task.status === TaskStatus.CANCELLED
-  ).length;
+    const cancelled = tasks.filter(
+      (task) => isOwner ? 
+          task.status === TaskStatus.CANCELLED : 
+          task.status === TaskStatus.CANCELLED && task.teamId?._id === assignedId
+    ).length;
+
+
 
 
   const chartData = [
